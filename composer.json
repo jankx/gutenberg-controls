@@ -1,0 +1,15 @@
+{
+    "name": "jankx/gutenberg-controls",
+    "autoload": {
+        "psr-4": {
+            "Jankx\\Gutenberg\\Controls\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Puleeno Nguyen",
+            "email": "puleeno@gmail.com"
+        }
+    ],
+    "require": {}
+}
