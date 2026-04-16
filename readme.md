@@ -1,14 +1,36 @@
 # Jankx Gutenberg Controls
 
-Advanced Gutenberg block controls and Higher-Order Components (HOCs) for the Jankx Framework. Provides custom inspector controls, block bindings, and Full Site Editing (FSE) utilities.
+**Extension layer for WordPress Gutenberg** — adds missing responsive, layout, and animation controls while maintaining 100% compatibility with WordPress core.
 
-## Features
+> **Philosophy: Extend, Don't Replace**
+> 
+> We enhance Gutenberg's native capabilities without breaking existing blocks or forking core functionality.
 
-- **Custom Inspector Controls**: Color, Typography, Spacing, Border, and Shadow controls
-- **Higher-Order Components (HOCs)**: Reusable block enhancement wrappers
-- **Block Bindings API**: Connect blocks to dynamic data sources (WP 6.5+)
-- **Full Site Editing Support**: Template parts, patterns, and global styles integration
-- **Native WordPress Compatibility**: Built on `@wordpress/components` and `@wordpress/compose`
+## What Makes This Different?
+
+### WordPress Core → Jankx Extension Layer
+
+```
+WordPress Gutenberg (Core)
+├─ Basic padding/margin controls (static values)
+├─ No responsive visibility per device
+├─ No column grid system
+├─ No scroll animations
+└─ Basic background options
+
+        ↓ Jankx Wraps & Enhances ↓
+
+Jankx Gutenberg Controls (Extension)
+├─ 🎨 Visual Spacing Control (drag handles, live preview)
+├─ 📱 Responsive Control (hide/show per device, breakpoints)
+├─ 📐 Grid System (1/2/3/4/6/12 columns, responsive)
+├─ ✨ Animation Control (scroll triggers, 30+ effects)
+├─ 🎭 Section Control (Flatsome-style with dividers/parallax)
+├─ 🎨 Icon Picker (favorites, recent, categories)
+└─ ⚡ Preset System (1-click design templates)
+```
+
+**Result**: Same WordPress blocks, supercharged with Flatsome UX Builder capabilities.
 
 ## Installation
 
@@ -33,19 +55,64 @@ add_filter('jankx/gutenberg/register-controls', function($controls) {
 });
 ```
 
-## Documentation
+## Architecture
 
-### Available Controls
+```
+┌─────────────────────────────────────────────────────────┐
+│  Your Block (jankx/hero)                                │
+├─────────────────────────────────────────────────────────┤
+│  AbstractBlockWithControls                              │
+│  ├─ Auto-enqueues assets                                │
+│  ├─ Generates CSS from control values                   │
+│  └─ Renders with jankxControls attributes               │
+├─────────────────────────────────────────────────────────┤
+│  Jankx Controls (Extensions)                            │
+│  ├─ VisualSpacingControl                                │
+│  ├─ ResponsiveControl                                    │
+│  ├─ IconPickerControl                                   │
+│  └─ AnimationControl                                    │
+├─────────────────────────────────────────────────────────┤
+│  WordPress Core (Native)                                │
+│  ├─ @wordpress/components                              │
+│  ├─ @wordpress/block-editor                            │
+│  └─ @wordpress/compose                                   │
+└─────────────────────────────────────────────────────────┘
+```
 
-| Control | Description | Supports |
-|---------|-------------|----------|
-| `ColorControl` | Advanced color picker | Gradient, Duotone, Transparency |
-| `TypographyControl` | Font and text styling | Font Library, Fluid Typography |
-| `SpacingControl` | Margin and padding | Responsive breakpoints |
-| `BorderControl` | Border styling | Radius, Width, Style |
-| `ShadowControl` | Box shadows | Presets, Custom values |
-| `AnimationControl` | Entrance & scroll animations | 30+ effects, parallax |
-| `SectionControl` | Flatsome-style sections | Dividers, backgrounds, sticky |
+### Key Principles
+
+1. **Zero Breaking Changes**: Existing blocks work unchanged
+2. **Progressive Enhancement**: Opt-in via `jankxControls` attribute
+3. **CSS-Only Output**: No JavaScript required for frontend
+4. **Native UI Patterns**: Uses WordPress component design system
+
+## Available Controls
+
+### Layout Controls
+
+| Control | Type | Description | WordPress Equivalent |
+|---------|------|-------------|---------------------|
+| `SectionControl` | Layout | Flatsome-style sections with dividers, parallax, sticky | ❌ None |
+| `ResponsiveControl` | Layout | Device visibility, columns, order, flex per breakpoint | ❌ None |
+| `VisualSpacingControl` | Layout | Drag-handle margin/padding with live preview | ⚠️ Basic (static) |
+| `RowControl` | Layout | Grid row with gap, alignment | ⚠️ Group block (limited) |
+
+### Style Controls
+
+| Control | Type | Description | WordPress Equivalent |
+|---------|------|-------------|---------------------|
+| `ColorControl` | Style | Color + gradient + duotone | ✅ Enhanced |
+| `TypographyControl` | Style | Font family, fluid typography | ✅ Enhanced |
+| `BorderControl` | Style | Border radius, style, color | ✅ Enhanced |
+| `ShadowControl` | Style | Box shadows with presets | ❌ None |
+
+### Advanced Controls
+
+| Control | Type | Description | WordPress Equivalent |
+|---------|------|-------------|---------------------|
+| `AnimationControl` | Effects | Scroll-triggered animations | ❌ None |
+| `IconPickerControl` | UI | Icon library with favorites | ❌ None |
+| `PresetManager` | System | 1-click design templates | ❌ None |
 
 ### Creating Blocks with Custom Controls
 
@@ -149,14 +216,59 @@ npm run build
 npm test
 ```
 
-## Architecture
+## How It Works
 
-This package follows the WordPress Gutenberg component patterns:
+### Control Rendering Flow
 
-- **Inspector Controls**: Sidebar panel components for block settings
-- **Higher-Order Components**: Wrapper functions that add functionality to blocks
-- **Block Bindings**: Data connection layer for dynamic content
-- **Slot/Fill Pattern**: Extensibility via WordPress SlotFill API
+```php
+// 1. Block registration
+$controls = [
+    'layout'     => SectionControl::class,      // Native WP doesn't have
+    'responsive' => ResponsiveControl::class,   // Native WP doesn't have  
+    'animation'  => AnimationControl::class,   // Native WP doesn't have
+];
+
+// 2. Editor: React components render in InspectorControls
+// Uses @wordpress/components as base, adds Jankx UX layer
+
+// 3. Frontend: PHP generates CSS from saved attributes
+// Output: WordPress-compatible CSS with responsive breakpoints
+```
+
+### CSS Output Example
+
+```css
+/* WordPress generates base styles */
+.wp-block-jankx-section {
+    background: #fff;
+}
+
+/* Jankx adds responsive enhancement */
+@media (max-width: 1024px) {
+    .wp-block-jankx-section { padding: 20px; }
+}
+@media (max-width: 767px) {
+    .wp-block-jankx-section { 
+        display: none; /* responsive hide */
+        flex-direction: column; /* auto-stack */
+    }
+}
+```
+
+## Gap Analysis: WordPress vs Jankx
+
+| Feature | WordPress Core | Jankx Extension | Impact |
+|---------|---------------|-----------------|---------|
+| **Responsive Visibility** | ❌ Not available | ✅ Hide/show per device | Critical for mobile design |
+| **Visual Spacing** | ⚠️ Static input fields | ✅ Drag handles, live preview | 10x faster workflow |
+| **Column Grid** | ⚠️ Column block (fixed) | ✅ 1/2/3/4/6/12 responsive cols | Flexible layouts |
+| **Scroll Animations** | ❌ Not available | ✅ 30+ entrance effects | Engaging UX |
+| **Section Dividers** | ❌ Not available | ✅ SVG shapes, parallax | Professional designs |
+| **Icon Picker** | ❌ Not available | ✅ Library with favorites | Consistent branding |
+| **Design Presets** | ⚠️ Patterns (static) | ✅ 1-click customizable | Rapid prototyping |
+| **Sticky Sections** | ❌ Not available | ✅ Sticky with offset | Modern navigation |
+
+**Total Enhancement**: 8 major features WordPress doesn't have natively.
 
 ## Compatibility
 

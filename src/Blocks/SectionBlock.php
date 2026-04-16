@@ -3,6 +3,7 @@
 namespace Jankx\Gutenberg\Blocks;
 
 use Jankx\Gutenberg\Controls\Layout\SectionControl;
+use Jankx\Gutenberg\Controls\Layout\ResponsiveControl;
 use Jankx\Gutenberg\Controls\Effects\AnimationControl;
 
 /**
@@ -21,6 +22,12 @@ class SectionBlock extends AbstractBlockWithControls
     protected $icon = [
         'foreground' => '#ff5722',
         'src' => 'layout',
+    ];
+
+    protected array $controls = [
+        'layout' => SectionControl::class,
+        'responsive' => ResponsiveControl::class,
+        'animation' => AnimationControl::class,
     ];
 
     protected $supports = [

@@ -15,6 +15,7 @@ import { __ } from '@wordpress/i18n';
 import PresetPanel from './inspector/PresetPanel';
 import VisualSpacingControl from './controls/VisualSpacingControl';
 import IconPickerControl from './controls/IconPickerControl';
+import ResponsiveControl from './controls/ResponsiveControl';
 
 // Import styles
 import './styles/editor.scss';
@@ -100,7 +101,37 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                         />
                     );
 
-                // Add more control types as they're implemented
+                case 'jankx/responsive':
+                    return (
+                        <ResponsiveControl
+                            key={controlName}
+                            label={controlConfig.label}
+                            value={value}
+                            onChange={(newValue) => updateControl(controlName, newValue)}
+                        />
+                    );
+
+                case 'jankx/color':
+                case 'jankx/typography':
+                case 'jankx/border':
+                case 'jankx/shadow':
+                    // Use WordPress core components with Jankx enhancements
+                    return (
+                        <div key={controlName} className="jankx-control-wrapper">
+                            {/* WordPress component wrapped with Jankx UX */}
+                            <span className="jankx-control-label">{controlConfig.label}</span>
+                        </div>
+                    );
+
+                case 'jankx/row':
+                case 'jankx/image':
+                    // Complex controls with dedicated inspectors
+                    return (
+                        <div key={controlName} className="jankx-control-wrapper jankx-complex-control">
+                            <span className="jankx-control-label">{controlConfig.label}</span>
+                            <span className="jankx-control-hint">{__('Configure in block toolbar', 'jankx')}</span>
+                        </div>
+                    );
 
                 default:
                     return null;
@@ -288,4 +319,5 @@ export {
     PresetPanel,
     VisualSpacingControl,
     IconPickerControl,
+    ResponsiveControl,
 };
