@@ -7,15 +7,27 @@
 
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, TabPanel } from '@wordpress/components';
+import { InspectorControls, BlockControls } from '@wordpress/block-editor';
+import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
+import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
+import { useState, useCallback, useRef } from '@wordpress/element';
+import { undo, redo, cloudUpload, mediaDocument } from '@wordpress/icons';
 
 // Import custom controls
 import PresetPanel from './inspector/PresetPanel';
 import VisualSpacingControl from './controls/VisualSpacingControl';
 import IconPickerControl from './controls/IconPickerControl';
 import ResponsiveControl from './controls/ResponsiveControl';
+import ColorControl from './controls/ColorControl';
+import TypographyControl from './controls/TypographyControl';
+
+// Import new components
+import useLivePreview, { withLivePreview } from './components/LivePreview';
+import { CustomPresetManager } from './components/CustomPresetManager';
+import { TemplateLibrary, TemplateExportButton } from './components/TemplateLibrary';
 
 // Import styles
 import './styles/editor.scss';
@@ -41,33 +53,129 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
         const jankxControls = attributes.jankxControls || {};
 
         /**
-         * Update a specific control value
+         * Enable live preview for real-time updates
          */
-        const updateControl = (controlName, value) => {
-            setAttributes({
-                jankxControls: {
-                    ...jankxControls,
-                    [controlName]: value,
-                },
-            });
-        };
+        useLivePreview(props.clientId, jankxControls);
+
+        // State for custom presets and template library
+        const [customPresets, setCustomPresets] = useState([]);
+        const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
+
+        // WordPress undo/redo dispatch
+        const { undo: undoAction, redo: redoAction } = useDispatch(editorStore);
+        const { createSuccessNotice } = useDispatch(noticesStore);
+
+        // History tracking for presets
+        const historyRef = useRef([]);
+        const historyIndexRef = useRef(-1);
 
         /**
-         * Apply a preset
+         * Save current state to history
          */
-        const applyPreset = (preset) => {
+        const saveToHistory = useCallback((controls) => {
+            // Remove any future history if we're not at the end
+            if (historyIndexRef.current < historyRef.current.length - 1) {
+                historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
+            }
+
+            historyRef.current.push(JSON.stringify(controls));
+            historyIndexRef.current++;
+
+            // Limit history to 50 states
+            if (historyRef.current.length > 50) {
+                historyRef.current.shift();
+                historyIndexRef.current--;
+            }
+        }, []);
+
+        /**
+         * Update a specific control value with live preview
+         */
+        const updateControl = useCallback((controlName, value) => {
             const newControls = {
                 ...jankxControls,
-                ...preset.controls,
+                [controlName]: value,
+            };
+
+            // Save to history before updating
+            saveToHistory(jankxControls);
+
+            setAttributes({
+                jankxControls: newControls,
+            });
+        }, [jankxControls, setAttributes, saveToHistory]);
+
+        /**
+         * Undo preset application
+         */
+        const undoPreset = useCallback(() => {
+            if (historyIndexRef.current > 0) {
+                historyIndexRef.current--;
+                const previousState = JSON.parse(historyRef.current[historyIndexRef.current]);
+
+                setAttributes({
+                    jankxControls: previousState,
+                });
+
+                createSuccessNotice(__('Reverted to previous state', 'jankx'), {
+                    type: 'snackbar',
+                });
+
+                // Also trigger WordPress undo
+                undoAction();
+            }
+        }, [setAttributes, undoAction, createSuccessNotice]);
+
+        /**
+         * Redo preset application
+         */
+        const redoPreset = useCallback(() => {
+            if (historyIndexRef.current < historyRef.current.length - 1) {
+                historyIndexRef.current++;
+                const nextState = JSON.parse(historyRef.current[historyIndexRef.current]);
+
+                setAttributes({
+                    jankxControls: nextState,
+                });
+
+                createSuccessNotice(__('Restored next state', 'jankx'), {
+                    type: 'snackbar',
+                });
+
+                // Also trigger WordPress redo
+                redoAction();
+            }
+        }, [setAttributes, redoAction, createSuccessNotice]);
+
+        /**
+         * Apply a preset with undo support
+         */
+        const applyPreset = useCallback((preset, presetName = 'Preset') => {
+            // Save current state before applying
+            saveToHistory(jankxControls);
+
+            const newControls = {
+                ...jankxControls,
+                ...(preset.controls || preset),
             };
 
             setAttributes({
                 jankxControls: newControls,
             });
 
-            // Show notification (in production, use wp.notice)
-            // console.log(`Applied preset: ${preset.title}`);
-        };
+            createSuccessNotice(
+                sprintf(__('Applied %s', 'jankx'), presetName),
+                {
+                    type: 'snackbar',
+                    actions: [
+                        {
+                            label: __('Undo', 'jankx'),
+                            onClick: undoPreset,
+                        },
+                    ],
+                }
+            );
+        }, [jankxControls, setAttributes, saveToHistory, undoPreset, createSuccessNotice]);
 
         /**
          * Render control based on type
@@ -112,14 +220,39 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                     );
 
                 case 'jankx/color':
+                    return (
+                        <ColorControl
+                            key={controlName}
+                            label={controlConfig.label}
+                            value={value}
+                            onChange={(newValue) => updateControl(controlName, newValue)}
+                            allowSolid={controlConfig.allowSolid !== false}
+                            allowGradient={controlConfig.allowGradient !== false}
+                            allowDuotone={controlConfig.allowDuotone !== false}
+                            allowAlpha={controlConfig.allowAlpha !== false}
+                            allowTheme={controlConfig.allowTheme !== false}
+                        />
+                    );
+
                 case 'jankx/typography':
+                    return (
+                        <TypographyControl
+                            key={controlName}
+                            label={controlConfig.label}
+                            value={value}
+                            onChange={(newValue) => updateControl(controlName, newValue)}
+                            allowFluid={controlConfig.allowFluid !== false}
+                            allowResponsive={controlConfig.allowResponsive !== false}
+                        />
+                    );
+
                 case 'jankx/border':
                 case 'jankx/shadow':
-                    // Use WordPress core components with Jankx enhancements
+                    // Placeholder for future implementation
                     return (
                         <div key={controlName} className="jankx-control-wrapper">
-                            {/* WordPress component wrapped with Jankx UX */}
                             <span className="jankx-control-label">{controlConfig.label}</span>
+                            <span className="jankx-control-hint">{__('Configure in Style tab', 'jankx')}</span>
                         </div>
                     );
 
@@ -142,6 +275,31 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
             <>
                 <BlockEdit {...props} />
 
+                {/* Block Toolbar - Template Library */}
+                {isSelected && (
+                    <BlockControls group="other">
+                        <ToolbarGroup>
+                            <TemplateExportButton clientId={props.clientId} />
+                            <ToolbarButton
+                                icon={cloudUpload}
+                                label={__('Import Template', 'jankx')}
+                                onClick={() => setIsTemplateLibraryOpen(true)}
+                            />
+                        </ToolbarGroup>
+                    </BlockControls>
+                )}
+
+                {/* Template Library Modal */}
+                {isTemplateLibraryOpen && (
+                    <TemplateLibrary
+                        clientId={props.clientId}
+                        isOpen={isTemplateLibraryOpen}
+                        onClose={() => setIsTemplateLibraryOpen(false)}
+                        mode="import"
+                    />
+                )}
+
+                {/* Inspector Controls */}
                 {isSelected && (
                     <InspectorControls group="styles">
                         <TabPanel
@@ -170,12 +328,55 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 switch (tab.name) {
                                     case 'presets':
                                         return (
-                                            <PresetPanel
-                                                presets={presets}
-                                                categories={categories}
-                                                currentValues={jankxControls}
-                                                onApplyPreset={applyPreset}
-                                            />
+                                            <>
+                                                {/* Built-in Presets */}
+                                                <PresetPanel
+                                                    presets={presets}
+                                                    categories={categories}
+                                                    currentValues={jankxControls}
+                                                    onApplyPreset={(preset) =>
+                                                        applyPreset(preset, preset.title)
+                                                    }
+                                                />
+
+                                                {/* Custom User Presets */}
+                                                <CustomPresetManager
+                                                    currentControls={jankxControls}
+                                                    onApplyPreset={(controls) =>
+                                                        applyPreset({ controls }, __('Custom Preset', 'jankx'))
+                                                    }
+                                                    onPresetsChange={setCustomPresets}
+                                                />
+
+                                                {/* Preset Undo/Redo */}
+                                                <PanelBody
+                                                    title={__('History', 'jankx')}
+                                                    initialOpen={false}
+                                                >
+                                                    <div className="jankx-history-controls">
+                                                        <ToolbarGroup>
+                                                            <ToolbarButton
+                                                                icon={undo}
+                                                                label={__('Undo Preset', 'jankx')}
+                                                                onClick={undoPreset}
+                                                                disabled={historyIndexRef.current <= 0}
+                                                            />
+                                                            <ToolbarButton
+                                                                icon={redo}
+                                                                label={__('Redo Preset', 'jankx')}
+                                                                onClick={redoPreset}
+                                                                disabled={
+                                                                    historyIndexRef.current >=
+                                                                    historyRef.current.length - 1
+                                                                }
+                                                            />
+                                                        </ToolbarGroup>
+                                                        <p className="jankx-history-hint">
+                                                            {__('Undo/Redo preset applications', 'jankx')}
+                                                        </p>
+                                                    </div>
+                                                </PanelBody>
+                                            </>
                                         );
 
                                     case 'layout':
@@ -315,9 +516,19 @@ wp.domReady(() => {
 /**
  * Export components for external use
  */
+/**
+ * Export all components for external use
+ */
 export {
     PresetPanel,
     VisualSpacingControl,
     IconPickerControl,
     ResponsiveControl,
+    ColorControl,
+    TypographyControl,
+    useLivePreview,
+    withLivePreview,
+    CustomPresetManager,
+    TemplateLibrary,
+    TemplateExportButton,
 };

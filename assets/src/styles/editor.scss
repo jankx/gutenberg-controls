@@ -598,3 +598,551 @@ $shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
     padding: 4px 8px;
     border-radius: 4px;
 }
+
+// ===== LIVE PREVIEW =====
+
+.jankx-live-preview {
+    position: relative;
+
+    &::before {
+        content: '✨ Live Preview';
+        position: absolute;
+        top: -20px;
+        right: 0;
+        font-size: 10px;
+        color: $primary-color;
+        background: white;
+        padding: 2px 6px;
+        border-radius: 12px;
+        box-shadow: $shadow-sm;
+        z-index: 10;
+    }
+}
+
+// CSS Variables for live preview
+[data-jankx-preview] {
+    transition: all 0.3s ease;
+}
+
+// ===== CUSTOM PRESET MANAGER =====
+
+.jankx-custom-presets {
+    .jankx-save-preset-btn {
+        width: 100%;
+        margin-bottom: 16px;
+        justify-content: center;
+    }
+}
+
+.jankx-presets-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.jankx-preset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: $border-radius;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: $primary-color;
+        box-shadow: $shadow-sm;
+    }
+}
+
+.jankx-preset-info {
+    flex: 1;
+    min-width: 0;
+
+    .jankx-preset-name {
+        display: block;
+        font-weight: 500;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .jankx-preset-desc {
+        display: block;
+        font-size: 11px;
+        color: #757575;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .jankx-preset-date {
+        display: block;
+        font-size: 10px;
+        color: #9e9e9e;
+        margin-top: 4px;
+    }
+}
+
+.jankx-preset-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+
+    .jankx-file-input-wrapper {
+        position: relative;
+
+        .jankx-file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
+}
+
+.jankx-no-presets {
+    text-align: center;
+    padding: 24px;
+    color: #757575;
+    font-size: 13px;
+    font-style: italic;
+}
+
+// Preset Modal
+.jankx-preset-modal {
+    .components-modal__content {
+        padding: 16px;
+    }
+
+    .jankx-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .jankx-modal-hint {
+        font-size: 12px;
+        color: #757575;
+        font-style: italic;
+        margin-top: 8px;
+    }
+}
+
+// ===== TEMPLATE LIBRARY =====
+
+.jankx-template-library {
+    .components-modal__content {
+        padding: 0;
+    }
+
+    .jankx-template-tabs {
+        padding: 16px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+
+        .components-button {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+}
+
+.jankx-template-export,
+.jankx-template-import {
+    padding: 24px;
+}
+
+.jankx-file-upload {
+    margin-bottom: 16px;
+
+    .jankx-template-file-input {
+        display: none;
+    }
+
+    .jankx-template-file-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        background: #f8f9fa;
+        border: 2px dashed #bdbdbd;
+        border-radius: $border-radius;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: $primary-color;
+            background: #fff3e0;
+        }
+
+        .jankx-template-file-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        span {
+            font-size: 14px;
+            color: #757575;
+        }
+    }
+}
+
+.jankx-template-divider {
+    position: relative;
+    text-align: center;
+    margin: 16px 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e0e0e0;
+    }
+
+    span {
+        position: relative;
+        background: white;
+        padding: 0 12px;
+        font-size: 12px;
+        color: #757575;
+    }
+}
+
+.jankx-template-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.jankx-template-preview {
+    padding: 24px;
+
+    .jankx-template-preview-title {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .jankx-template-version {
+        font-size: 12px;
+        color: #757575;
+        background: #f5f5f5;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+
+    .jankx-template-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 12px;
+        color: #757575;
+
+        code {
+            font-size: 11px;
+            background: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    }
+}
+
+.jankx-template-warning {
+    font-size: 12px;
+    color: #757575;
+    text-align: center;
+    margin-top: 16px;
+}
+
+// ===== HISTORY CONTROLS =====
+
+.jankx-history-controls {
+    padding: 12px;
+
+    .components-toolbar-group {
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .jankx-history-hint {
+        font-size: 11px;
+        color: #757575;
+        text-align: center;
+        margin: 0;
+    }
+}
+
+// ===== SNACKBAR NOTIFICATIONS =====
+
+.components-snackbar__action {
+    color: $primary-color;
+    font-weight: 500;
+
+    &:hover {
+        color: darken($primary-color, 10%);
+    }
+}
+
+// ===== TOOLBAR INTEGRATION =====
+
+.block-editor-block-toolbar {
+    .jankx-toolbar-group {
+        .components-button {
+            &.is-pressed {
+                background: $primary-color;
+                color: white;
+            }
+        }
+    }
+}
+
+// ===== ANIMATION FOR LIVE UPDATES =====
+
+@keyframes jankx-pulse-highlight {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba($primary-color, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba($primary-color, 0);
+    }
+}
+
+.jankx-updated {
+    animation: jankx-pulse-highlight 0.6s ease;
+}
+
+// ===== COLOR CONTROL =====
+
+.jankx-color-control {
+    .jankx-color-preview {
+        height: 60px;
+        border-radius: $border-radius;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        box-shadow: $shadow-sm;
+        border: 2px solid #e0e0e0;
+        position: relative;
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: $primary-color;
+        }
+
+        .jankx-color-preview-label {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #333;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    }
+
+    .jankx-color-tabs {
+        margin-bottom: 16px;
+
+        .components-button {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    .jankx-color-panel {
+        padding: 12px 0;
+    }
+
+    .jankx-color-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #757575;
+        margin: 8px 0 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .jankx-theme-colors,
+    .jankx-preset-colors {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+
+        .jankx-theme-color-btn,
+        .jankx-preset-color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            padding: 0;
+            min-width: auto;
+            position: relative;
+            transition: all 0.2s ease;
+
+            &:hover {
+                transform: scale(1.1);
+            }
+
+            &.is-active {
+                border-color: $primary-color;
+                box-shadow: 0 0 0 2px white, 0 0 0 4px $primary-color;
+            }
+
+            .jankx-color-check {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-size: 14px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            }
+        }
+    }
+
+    .jankx-color-picker-wrapper {
+        .components-color-picker {
+            width: 100%;
+
+            .components-color-picker__body {
+                padding: 8px;
+            }
+        }
+    }
+
+    .jankx-gradient-type {
+        width: 100%;
+
+        .components-button {
+            flex: 1;
+        }
+    }
+}
+
+// ===== TYPOGRAPHY CONTROL =====
+
+.jankx-typography-control {
+    .jankx-typo-preview {
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        word-break: break-word;
+    }
+
+    .jankx-typo-tabs {
+        margin-bottom: 16px;
+
+        .components-tab-panel__tabs {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .components-tab-panel__tab-content {
+            padding-top: 16px;
+        }
+    }
+
+    .jankx-typo-panel {
+        padding: 4px 0;
+    }
+
+    .jankx-typo-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #757575;
+        margin: 8px 0 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .jankx-typo-style-toggle {
+        width: 100%;
+
+        .components-button {
+            flex: 1;
+        }
+    }
+
+    .jankx-typo-device-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .jankx-typo-device-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+            width: 60px;
+        }
+    }
+
+    .components-toggle-control {
+        margin-bottom: 8px;
+    }
+
+    .components-range-control {
+        margin-bottom: 8px;
+    }
+
+    .components-unit-control {
+        .components-unit-control__select {
+            font-size: 11px;
+        }
+    }
+}
+
+// ===== COLOR POPOVER =====
+
+.jankx-color-popover {
+    padding: 12px;
+    min-width: 240px;
+
+    .components-color-picker {
+        width: 100%;
+    }
+}
+
+// ===== FORM ELEMENTS =====
+
+.jankx-control-wrapper {
+    padding: 8px 0;
+
+    .jankx-control-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #757575;
+        margin-bottom: 8px;
+    }
+
+    .jankx-control-hint {
+        display: block;
+        font-size: 12px;
+        color: #9e9e9e;
+        font-style: italic;
+    }
+
+    &.jankx-complex-control {
+        background: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        border: 1px dashed #e0e0e0;
+    }
+}

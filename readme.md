@@ -101,10 +101,11 @@ add_filter('jankx/gutenberg/register-controls', function($controls) {
 
 | Control | Type | Description | WordPress Equivalent |
 |---------|------|-------------|---------------------|
-| `ColorControl` | Style | Color + gradient + duotone | ✅ Enhanced |
-| `TypographyControl` | Style | Font family, fluid typography | ✅ Enhanced |
+| `ColorControl` | Style | Color + gradient + duotone + alpha + theme colors | ✅ Enhanced |
+| `TypographyControl` | Style | Font library + fluid sizing + text effects | ✅ Enhanced |
 | `BorderControl` | Style | Border radius, style, color | ✅ Enhanced |
 | `ShadowControl` | Style | Box shadows with presets | ❌ None |
+| `ImagePickerControl` | Media | Media library + focal point + overlays | ❌ None |
 
 ### Advanced Controls
 
