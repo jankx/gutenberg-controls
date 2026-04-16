@@ -1,7 +1,7 @@
 {
   "name": "@jankx/gutenberg-controls",
   "version": "1.0.0",
-  "description": "",
+  "description": "Custom Gutenberg controls and High-Order Components for Jankx framework.",
   "homepage": "https://github.com/jankx/gutenberg-controls#readme",
   "bugs": {
     "url": "https://github.com/jankx/gutenberg-controls/issues"
@@ -11,10 +11,24 @@
     "url": "git+https://github.com/jankx/gutenberg-controls.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": "Puleeno Nguyen",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "format": "wp-scripts format",
+    "lint:js": "wp-scripts lint-js",
+    "test": "wp-scripts test-unit-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^26.0.0"
+  },
+  "dependencies": {
+    "@wordpress/components": "^25.0.0",
+    "@wordpress/compose": "^6.0.0",
+    "@wordpress/data": "^9.0.0",
+    "@wordpress/element": "^5.0.0",
+    "@wordpress/i18n": "^4.0.0"
   }
 }

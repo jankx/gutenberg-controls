@@ -1,0 +1,600 @@
+/**
+ * Jankx Gutenberg Controls - Editor Styles
+ * High-UX visual components for Flatsome-style Gutenberg blocks
+ */
+
+// Variables
+$primary-color: #ff5722;
+$secondary-color: #764ba2;
+$accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$border-radius: 4px;
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+// ===== PRESET PANEL =====
+
+.jankx-quick-presets {
+    margin-bottom: 16px;
+
+    label {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: #757575;
+        margin-bottom: 8px;
+    }
+}
+
+.jankx-quick-buttons {
+    display: flex;
+    gap: 4px;
+
+    .jankx-quick-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: $border-radius;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: $shadow-md;
+        }
+    }
+}
+
+.jankx-browse-presets {
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: $shadow-md;
+    }
+}
+
+.jankx-preset-hint {
+    font-size: 12px;
+    color: #757575;
+    margin-top: 12px;
+    font-style: italic;
+}
+
+// Preset Modal
+.jankx-preset-modal {
+    .components-modal__content {
+        padding: 0;
+    }
+
+    .components-modal__header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+}
+
+.jankx-preset-toolbar {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+
+    .components-search-control {
+        margin-bottom: 12px;
+    }
+}
+
+.jankx-category-filter {
+    flex-wrap: wrap;
+    gap: 4px;
+
+    button {
+        font-size: 12px;
+        padding: 4px 12px;
+        height: auto;
+    }
+}
+
+.jankx-presets-grid {
+    padding: 24px;
+    background: #f8f9fa;
+    min-height: 400px;
+}
+
+// Preset Card
+.jankx-preset-card {
+    background: white;
+    border-radius: $border-radius;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $shadow-lg;
+    }
+
+    &.is-selected {
+        box-shadow: 0 0 0 3px $primary-color;
+    }
+}
+
+.jankx-preset-card__media {
+    position: relative;
+    height: 120px;
+    background: #e0e0e0;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover img {
+        transform: scale(1.05);
+    }
+}
+
+.jankx-preset-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $accent-gradient;
+
+    span {
+        font-size: 48px;
+        font-weight: bold;
+        color: white;
+    }
+}
+
+.jankx-preset-card__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    .jankx-preset-card:hover & {
+        opacity: 1;
+    }
+}
+
+.jankx-preset-card__body {
+    padding: 12px;
+
+    h4 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0;
+        font-size: 12px;
+        color: #757575;
+    }
+}
+
+.jankx-preset-card__tags {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.jankx-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: #e3f2fd;
+    color: #1976d2;
+    border-radius: 12px;
+    text-transform: lowercase;
+}
+
+.jankx-no-presets {
+    text-align: center;
+    padding: 60px 20px;
+    color: #757575;
+}
+
+// ===== VISUAL SPACING CONTROL =====
+
+.jankx-visual-spacing {
+    .components-base-control__label {
+        margin-bottom: 8px;
+    }
+}
+
+.jankx-device-selector {
+    margin-bottom: 16px;
+
+    button {
+        &.is-primary {
+            background: $primary-color;
+        }
+    }
+}
+
+.jankx-spacing-box {
+    position: relative;
+    background: repeating-linear-gradient(
+        45deg,
+        #f5f5f5,
+        #f5f5f5 10px,
+        #fafafa 10px,
+        #fafafa 20px
+    );
+    border-radius: $border-radius;
+    margin: 20px auto;
+    transition: all 0.3s ease;
+}
+
+.jankx-spacing-side {
+    transition: all 0.2s ease;
+    user-select: none;
+
+    &:hover,
+    &.is-hovered {
+        background: #ffccbc !important;
+    }
+
+    &.is-dragging {
+        background: $primary-color !important;
+        color: white !important;
+    }
+}
+
+.jankx-spacing-handle {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+
+    .jankx-spacing-side:hover & {
+        background: $primary-color;
+    }
+}
+
+.jankx-spacing-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.jankx-link-toggle {
+    flex-shrink: 0;
+    margin-top: 20px;
+
+    &.is-primary {
+        background: $primary-color;
+    }
+}
+
+.jankx-spacing-inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    flex: 1;
+
+    .components-unit-control {
+        input {
+            font-size: 12px;
+        }
+    }
+}
+
+.jankx-spacing-presets {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+
+    label {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        color: #757575;
+        margin-bottom: 8px;
+    }
+}
+
+.jankx-preset-buttons {
+    flex-wrap: wrap;
+    gap: 4px;
+
+    button {
+        font-size: 11px;
+        padding: 2px 8px;
+        height: auto;
+        min-height: 24px;
+    }
+}
+
+// ===== ICON PICKER CONTROL =====
+
+.jankx-icon-picker {
+    .components-base-control__label {
+        margin-bottom: 8px;
+    }
+}
+
+.jankx-icon-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: $border-radius;
+    margin-bottom: 12px;
+}
+
+.jankx-icon-display {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: $border-radius;
+    box-shadow: $shadow-sm;
+    transition: all 0.2s ease;
+}
+
+.jankx-icon-symbol {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.jankx-icon-info {
+    flex: 1;
+
+    span {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: #333;
+    }
+}
+
+.jankx-icon-placeholder {
+    color: #757575;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.jankx-icon-browse {
+    flex-shrink: 0;
+}
+
+// Icon Popover
+.jankx-icon-popover {
+    .components-popover__content {
+        width: 360px;
+        padding: 16px;
+    }
+}
+
+.jankx-icon-picker-content {
+    .components-search-control {
+        margin-bottom: 12px;
+    }
+}
+
+.jankx-icon-customize {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: $border-radius;
+    margin-bottom: 12px;
+}
+
+.jankx-icon-color {
+    position: relative;
+}
+
+.jankx-icon-tabs {
+    .components-tab-panel__tabs {
+        margin-bottom: 12px;
+        border-bottom: 1px solid #e0e0e0;
+
+        button {
+            font-size: 12px;
+            padding: 8px 12px;
+
+            &.is-active {
+                color: $primary-color;
+                box-shadow: inset 0 -2px 0 0 $primary-color;
+            }
+        }
+    }
+}
+
+.jankx-icon-search-results,
+.jankx-icon-tabs .components-tab-panel__tab-content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.jankx-icon-item {
+    position: relative;
+
+    .jankx-icon-btn {
+        width: 100%;
+        height: 44px;
+        padding: 0;
+        justify-content: center;
+        border-radius: $border-radius;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+    }
+
+    &.is-selected .jankx-icon-btn {
+        background: $primary-color;
+        color: white;
+        box-shadow: $shadow-md;
+    }
+}
+
+.jankx-icon-fav {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    padding: 0 !important;
+    opacity: 0;
+    transition: all 0.2s ease;
+
+    .jankx-icon-item:hover & {
+        opacity: 1;
+    }
+
+    &.is-favorite {
+        opacity: 1;
+        color: #ffc107;
+    }
+}
+
+.jankx-no-results,
+.jankx-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #757575;
+    font-size: 13px;
+}
+
+// ===== ANIMATION PREVIEW =====
+
+.jankx-animation-preview {
+    margin: 16px 0;
+    padding: 24px;
+    background: #f8f9fa;
+    border-radius: $border-radius;
+    text-align: center;
+
+    .preview-box {
+        display: inline-block;
+        padding: 20px 40px;
+        background: $accent-gradient;
+        color: white;
+        border-radius: $border-radius;
+        font-weight: 600;
+    }
+}
+
+.jankx-animation-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 8px;
+
+    button {
+        justify-content: flex-start;
+        font-size: 12px;
+        padding: 8px;
+
+        &.is-primary {
+            background: $primary-color;
+        }
+    }
+}
+
+// ===== RESPONSIVE BREAKPOINT INDICATOR =====
+
+.jankx-responsive-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #e3f2fd;
+    border-radius: $border-radius;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #1976d2;
+
+    .dashicon {
+        color: #1976d2;
+    }
+}
+
+// ===== LOADING & EMPTY STATES =====
+
+.jankx-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+
+    .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e0e0e0;
+        border-top-color: $primary-color;
+        border-radius: 50%;
+        animation: jankx-spin 0.8s linear infinite;
+    }
+}
+
+@keyframes jankx-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ===== SCROLLBAR STYLING =====
+
+.jankx-presets-grid,
+.jankx-icon-tabs .components-tab-panel__tab-content,
+.jankx-animation-list {
+    scrollbar-width: thin;
+    scrollbar-color: #bdbdbd transparent;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #bdbdbd;
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #757575;
+    }
+}
+
+// ===== TOOLTIP ENHANCEMENTS =====
+
+.components-tooltip .components-popover__content {
+    background: #333;
+    color: white;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
