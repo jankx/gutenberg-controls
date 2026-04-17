@@ -1,8 +1,8 @@
 <?php
 
-namespace Jankx\Gutenberg\Registry;
+namespace Jankx\Gutenberg\Controls\Registry;
 
-use Jankx\Gutenberg\Blocks\AbstractBlockWithControls;
+use Jankx\Gutenberg\Controls\Blocks\AbstractBlockWithControls;
 
 /**
  * Central registry for all Jankx blocks with custom controls

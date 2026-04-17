@@ -1,6 +1,6 @@
 <?php
 
-namespace Jankx\Gutenberg\Presets;
+namespace Jankx\Gutenberg\Controls\Presets;
 
 /**
  * Preset Manager - One-click design templates (Flatsome-style)
@@ -89,6 +89,21 @@ class PresetManager
         ]);
 
         return $this;
+    }
+
+    /**
+     * Register a preset for a specific block
+     *
+     * @param string $blockName
+     * @param array $config
+     * @return self
+     */
+    public function registerPresetForBlock(string $blockName, array $config): self
+    {
+        $id = $config['id'] ?? uniqid('preset-');
+        $config['block'] = $blockName;
+
+        return $this->register($id, $config);
     }
 
     /**
@@ -465,5 +480,15 @@ class PresetManager
             'presets' => array_values($this->presets),
             'categories' => $this->categories,
         ];
+    }
+
+    /**
+     * Get all presets for JavaScript integration
+     *
+     * @return array
+     */
+    public function getAllPresetsForJS(): array
+    {
+        return array_values($this->presets);
     }
 }

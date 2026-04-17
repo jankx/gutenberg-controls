@@ -1,9 +1,9 @@
 <?php
 
-namespace Jankx\Gutenberg\Blocks;
+namespace Jankx\Gutenberg\Controls\Blocks;
 
 use Jankx\Gutenberg\Controls\AbstractControl;
-use Jankx\Gutenberg\Registry\ControlRegistry;
+use Jankx\Gutenberg\Controls\Registry\ControlRegistry;
 
 /**
  * Abstract base class for blocks with custom controls

@@ -1,0 +1,12 @@
+/* Jankx Gutenberg Controls - Editor Styles */
+
+.jankx-controls-placeholder {
+    padding: 16px;
+    background: #fff;
+    border: 1px dashed #ff5722;
+    border-radius: 4px;
+}
+
+.jankx-controls-placeholder p {
+    margin: 0 0 8px;
+}

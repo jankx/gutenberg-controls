@@ -1,6 +1,6 @@
 <?php
 
-namespace Jankx\Gutenberg\Blocks;
+namespace Jankx\Gutenberg\Controls\Blocks;
 
 use Jankx\Gutenberg\Controls\Layout\SectionControl;
 use Jankx\Gutenberg\Controls\Layout\ResponsiveControl;
