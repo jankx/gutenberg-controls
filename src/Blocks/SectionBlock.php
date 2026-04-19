@@ -465,7 +465,7 @@ SVG;
         // Parallax script
         wp_enqueue_script(
             'jankx-parallax',
-            plugins_url('assets/dist/parallax.js', __DIR__),
+            $this->getAssetUrl('assets/build/parallax.js'),
             [],
             '1.0.0',
             true
@@ -474,7 +474,7 @@ SVG;
         // Sticky section script
         wp_enqueue_script(
             'jankx-sticky',
-            plugins_url('assets/dist/sticky.js', __DIR__),
+            $this->getAssetUrl('assets/build/sticky.js'),
             [],
             '1.0.0',
             true

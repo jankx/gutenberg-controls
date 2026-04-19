@@ -260,5 +260,38 @@ abstract class AbstractControl
     public function shouldRender(array $blockContext = []): bool
     {
         return true;
+    /**
+     * Get asset URL
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function getAssetUrl(string $path): string
+    {
+        $packageRoot = dirname(__DIR__, 2);
+        $relativePath = ltrim($path, '/');
+
+        // Check if we are in a plugin
+        if (strpos($packageRoot, wp_normalize_path(WP_PLUGIN_DIR)) === 0) {
+            return plugins_url($relativePath, $packageRoot . '/composer.json');
+        }
+
+        // Check if we are in a theme
+        $themeDir = wp_normalize_path(get_template_directory());
+        if (strpos($packageRoot, $themeDir) === 0) {
+            $themeUrl = get_template_directory_uri();
+            $pathInTheme = str_replace($themeDir, '', $packageRoot);
+            return $themeUrl . $pathInTheme . '/' . $relativePath;
+        }
+
+        // Fallback for other locations (like symlinks)
+        $contentDir = wp_normalize_path(WP_CONTENT_DIR);
+        if (strpos($packageRoot, $contentDir) === 0) {
+            $contentUrl = content_url();
+            $pathInContent = str_replace($contentDir, '', $packageRoot);
+            return $contentUrl . $pathInContent . '/' . $relativePath;
+        }
+
+        return $relativePath;
     }
 }

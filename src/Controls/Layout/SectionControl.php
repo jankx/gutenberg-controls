@@ -212,7 +212,7 @@ class SectionControl extends AbstractControl
     {
         wp_enqueue_script(
             'jankx-section-control',
-            plugins_url('assets/dist/section-control.js', __DIR__),
+            $this->getAssetUrl('assets/build/section-control.js'),
             ['wp-blocks', 'wp-components', 'wp-compose'],
             '1.0.0',
             true
@@ -220,7 +220,7 @@ class SectionControl extends AbstractControl
 
         wp_enqueue_style(
             'jankx-section-control',
-            plugins_url('assets/dist/section-control.css', __DIR__),
+            $this->getAssetUrl('assets/build/section-control.css'),
             [],
             '1.0.0'
         );
