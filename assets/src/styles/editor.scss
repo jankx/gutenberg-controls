@@ -3,6 +3,8 @@
  * High-UX visual components for Flatsome-style Gutenberg blocks
  */
 
+@use 'sass:color';
+
 // Variables
 $primary-color: #ff5722;
 $secondary-color: #764ba2;
@@ -890,7 +892,7 @@ $shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
     font-weight: 500;
 
     &:hover {
-        color: darken($primary-color, 10%);
+        color: color.adjust($primary-color, $lightness: -10%);
     }
 }
 

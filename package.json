@@ -12,8 +12,7 @@
   },
   "license": "ISC",
   "author": "Puleeno Nguyen",
-  "type": "commonjs",
-  "main": "build/index.js",
+  "main": "assets/build/editor.js",
   "scripts": {
     "start": "wp-scripts start",
     "build": "wp-scripts build",

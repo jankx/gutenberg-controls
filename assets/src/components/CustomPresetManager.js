@@ -24,7 +24,7 @@ import {
     chevronDown,
     check,
     trash,
-    edit,
+    pencil,
     download,
     upload,
     plus,
@@ -375,7 +375,7 @@ export const CustomPresetManager = ({
                                                     {__('Apply', 'jankx')}
                                                 </MenuItem>
                                                 <MenuItem
-                                                    icon={edit}
+                                                    icon={pencil}
                                                     onClick={() => {
                                                         openEditModal(preset);
                                                         onClose();

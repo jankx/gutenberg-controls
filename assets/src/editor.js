@@ -14,7 +14,7 @@ import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
 import { useState, useCallback, useRef } from '@wordpress/element';
-import { undo, redo, cloudUpload, mediaDocument } from '@wordpress/icons';
+import { undo, redo, cloudUpload, file } from '@wordpress/icons';
 
 // Import custom controls
 import PresetPanel from './inspector/PresetPanel';
@@ -25,6 +25,7 @@ import ColorControl from './controls/ColorControl';
 import TypographyControl from './controls/TypographyControl';
 
 // Import new components
+import ResponsiveWrapper from './components/ResponsiveWrapper';
 import useLivePreview, { withLivePreview } from './components/LivePreview';
 import { CustomPresetManager } from './components/CustomPresetManager';
 import { TemplateLibrary, TemplateExportButton } from './components/TemplateLibrary';
@@ -178,97 +179,119 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
         }, [jankxControls, setAttributes, saveToHistory, undoPreset, createSuccessNotice]);
 
         /**
-         * Render control based on type
+         * Render control based on type, optionally wrapped with ResponsiveWrapper
          */
         const renderControl = (controlName, controlConfig) => {
             const value = jankxControls[controlName] || {};
 
-            switch (controlConfig.type) {
-                case 'jankx/spacing':
-                case 'jankx/visual-spacing':
-                    return (
-                        <VisualSpacingControl
-                            key={controlName}
-                            label={controlConfig.label}
-                            value={value}
-                            onChange={(newValue) => updateControl(controlName, newValue)}
-                            allowResponsive={true}
-                        />
-                    );
+            const renderContent = (overrideValue, overrideOnChange) => {
+                const currentValue = overrideValue !== undefined ? overrideValue : value;
+                const handleChange = overrideOnChange || ((newValue) => updateControl(controlName, newValue));
 
-                case 'jankx/icon':
-                case 'jankx/icon-picker':
-                    return (
-                        <IconPickerControl
-                            key={controlName}
-                            label={controlConfig.label}
-                            value={value}
-                            onChange={(newValue) => updateControl(controlName, newValue)}
-                            allowColor={true}
-                            allowSize={true}
-                        />
-                    );
+                switch (controlConfig.type) {
+                    case 'jankx/spacing':
+                    case 'jankx/visual-spacing':
+                        return (
+                            <VisualSpacingControl
+                                key={controlName}
+                                label={controlConfig.label}
+                                value={currentValue}
+                                onChange={handleChange}
+                                allowResponsive={controlConfig.responsive !== false}
+                            />
+                        );
 
-                case 'jankx/responsive':
-                    return (
-                        <ResponsiveControl
-                            key={controlName}
-                            label={controlConfig.label}
-                            value={value}
-                            onChange={(newValue) => updateControl(controlName, newValue)}
-                        />
-                    );
+                    case 'jankx/icon':
+                    case 'jankx/icon-picker':
+                        return (
+                            <IconPickerControl
+                                key={controlName}
+                                label={controlConfig.label}
+                                value={currentValue}
+                                onChange={handleChange}
+                                allowColor={true}
+                                allowSize={true}
+                            />
+                        );
 
-                case 'jankx/color':
-                    return (
-                        <ColorControl
-                            key={controlName}
-                            label={controlConfig.label}
-                            value={value}
-                            onChange={(newValue) => updateControl(controlName, newValue)}
-                            allowSolid={controlConfig.allowSolid !== false}
-                            allowGradient={controlConfig.allowGradient !== false}
-                            allowDuotone={controlConfig.allowDuotone !== false}
-                            allowAlpha={controlConfig.allowAlpha !== false}
-                            allowTheme={controlConfig.allowTheme !== false}
-                        />
-                    );
+                    case 'jankx/responsive':
+                        return (
+                            <ResponsiveControl
+                                key={controlName}
+                                label={controlConfig.label}
+                                value={currentValue}
+                                onChange={handleChange}
+                            />
+                        );
 
-                case 'jankx/typography':
-                    return (
-                        <TypographyControl
-                            key={controlName}
-                            label={controlConfig.label}
-                            value={value}
-                            onChange={(newValue) => updateControl(controlName, newValue)}
-                            allowFluid={controlConfig.allowFluid !== false}
-                            allowResponsive={controlConfig.allowResponsive !== false}
-                        />
-                    );
+                    case 'jankx/color':
+                        return (
+                            <ColorControl
+                                key={controlName}
+                                label={controlConfig.label}
+                                value={currentValue}
+                                onChange={handleChange}
+                                allowSolid={controlConfig.allowSolid !== false}
+                                allowGradient={controlConfig.allowGradient !== false}
+                                allowDuotone={controlConfig.allowDuotone !== false}
+                                allowAlpha={controlConfig.allowAlpha !== false}
+                                allowTheme={controlConfig.allowTheme !== false}
+                            />
+                        );
 
-                case 'jankx/border':
-                case 'jankx/shadow':
-                    // Placeholder for future implementation
-                    return (
-                        <div key={controlName} className="jankx-control-wrapper">
-                            <span className="jankx-control-label">{controlConfig.label}</span>
-                            <span className="jankx-control-hint">{__('Configure in Style tab', 'jankx')}</span>
-                        </div>
-                    );
+                    case 'jankx/typography':
+                        return (
+                            <TypographyControl
+                                key={controlName}
+                                label={controlConfig.label}
+                                value={currentValue}
+                                onChange={handleChange}
+                                allowFluid={controlConfig.allowFluid !== false}
+                                allowResponsive={controlConfig.allowResponsive !== false}
+                            />
+                        );
 
-                case 'jankx/row':
-                case 'jankx/image':
-                    // Complex controls with dedicated inspectors
-                    return (
-                        <div key={controlName} className="jankx-control-wrapper jankx-complex-control">
-                            <span className="jankx-control-label">{controlConfig.label}</span>
-                            <span className="jankx-control-hint">{__('Configure in block toolbar', 'jankx')}</span>
-                        </div>
-                    );
+                    case 'jankx/border':
+                    case 'jankx/shadow':
+                        return (
+                            <div key={controlName} className="jankx-control-wrapper">
+                                <span className="jankx-control-label">{controlConfig.label}</span>
+                                <span className="jankx-control-hint">{__('Configure in Style tab', 'jankx')}</span>
+                            </div>
+                        );
 
-                default:
-                    return null;
+                    case 'jankx/row':
+                    case 'jankx/image':
+                        return (
+                            <div key={controlName} className="jankx-control-wrapper jankx-complex-control">
+                                <span className="jankx-control-label">{controlConfig.label}</span>
+                                <span className="jankx-control-hint">{__('Configure in block toolbar', 'jankx')}</span>
+                            </div>
+                        );
+
+                    default:
+                        return null;
+                }
+            };
+
+            // Wrap with responsive device tabs when enabled
+            if (controlConfig.responsive) {
+                return (
+                    <ResponsiveWrapper
+                        key={controlName}
+                        label={controlConfig.label}
+                        value={value}
+                        onChange={(newValue) => updateControl(controlName, newValue)}
+                        responsive={true}
+                    >
+                        {({ value: deviceValue, onChange: deviceOnChange }) =>
+                            renderContent(deviceValue, deviceOnChange)
+                        }
+                    </ResponsiveWrapper>
+                );
             }
+
+            return renderContent();
         };
 
         return (

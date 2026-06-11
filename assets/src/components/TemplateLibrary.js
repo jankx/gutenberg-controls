@@ -34,7 +34,7 @@ import {
     trash,
     external,
     cloudUpload,
-    mediaDocument,
+    file,
 } from '@wordpress/icons';
 
 const TEMPLATE_VERSION = '1.0';
@@ -470,7 +470,7 @@ export const TemplateExportButton = ({ clientId }) => {
     return (
         <>
             <Button
-                icon={mediaDocument}
+                icon={file}
                 label={__('Template Library', 'jankx')}
                 onClick={() => setIsOpen(true)}
                 size="compact"

@@ -25,7 +25,7 @@ import {
 } from '@wordpress/components';
 import {
     color as colorIcon,
-    gradient as gradientIcon,
+    brush as gradientIcon,
     filter as filterIcon,
     check,
 } from '@wordpress/icons';

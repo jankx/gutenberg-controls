@@ -31,16 +31,15 @@ import {
     tablet,
     mobile,
     layout,
-    order as orderIcon,
-    textAlignLeft,
-    textAlignCenter,
-    textAlignRight,
-    textAlignJustify,
+    listView as orderIcon,
+    alignLeft,
+    alignCenter,
+    alignRight,
+    alignJustify,
     arrowRight,
     arrowDown,
     arrowUp,
     arrowLeft,
-    stackUp,
 } from '@wordpress/icons';
 
 /**
@@ -111,10 +110,10 @@ const JUSTIFY_CONTENT = [
 ];
 
 const TEXT_ALIGNMENTS = [
-    { value: 'left', label: __('Left', 'jankx'), icon: textAlignLeft },
-    { value: 'center', label: __('Center', 'jankx'), icon: textAlignCenter },
-    { value: 'right', label: __('Right', 'jankx'), icon: textAlignRight },
-    { value: 'justify', label: __('Justify', 'jankx'), icon: textAlignJustify },
+    { value: 'left', label: __('Left', 'jankx'), icon: alignLeft },
+    { value: 'center', label: __('Center', 'jankx'), icon: alignCenter },
+    { value: 'right', label: __('Right', 'jankx'), icon: alignRight },
+    { value: 'justify', label: __('Justify', 'jankx'), icon: alignJustify },
 ];
 
 const STACK_PRESETS = getStackPresets();

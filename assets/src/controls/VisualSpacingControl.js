@@ -14,7 +14,7 @@ import {
     Tooltip,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { link, linkOff, deviceDesktop, deviceTablet, deviceMobile } from '@wordpress/icons';
+import { link, linkOff, desktop, tablet, mobile } from '@wordpress/icons';
 
 const PRESET_VALUES = ['0', '8px', '16px', '24px', '32px', '48px', '64px', '96px', '128px'];
 
@@ -205,25 +205,25 @@ const VisualSpacingControl = ({
             {allowResponsive && (
                 <ButtonGroup className="jankx-device-selector">
                     <Button
-                        icon={deviceDesktop}
+                        icon={desktop}
                         variant={activeDevice === 'ultrawide' ? 'primary' : 'secondary'}
                         onClick={() => setActiveDevice('ultrawide')}
                         size="small"
                     />
                     <Button
-                        icon={deviceDesktop}
+                        icon={desktop}
                         variant={activeDevice === 'desktop' ? 'primary' : 'secondary'}
                         onClick={() => setActiveDevice('desktop')}
                         size="small"
                     />
                     <Button
-                        icon={deviceTablet}
+                        icon={tablet}
                         variant={activeDevice === 'tablet' ? 'primary' : 'secondary'}
                         onClick={() => setActiveDevice('tablet')}
                         size="small"
                     />
                     <Button
-                        icon={deviceMobile}
+                        icon={mobile}
                         variant={activeDevice === 'mobile' ? 'primary' : 'secondary'}
                         onClick={() => setActiveDevice('mobile')}
                         size="small"

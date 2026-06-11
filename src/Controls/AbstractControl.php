@@ -218,9 +218,10 @@ abstract class AbstractControl
         }
 
         $css = [];
-        foreach ($this->breakpoints as $device => $mediaQuery) {
+        foreach ($this->breakpoints as $device => $bp) {
             if (isset($value[$device])) {
                 $deviceCss = $this->generateCss($value[$device], $selector);
+                $mediaQuery = $this->getMediaQuery($device);
                 if ($mediaQuery) {
                     $css[$device] = "{$mediaQuery} { {$deviceCss} }";
                 } else {
@@ -230,6 +231,27 @@ abstract class AbstractControl
         }
 
         return $css;
+    }
+
+    /**
+     * Generate media query string from breakpoint config
+     */
+    protected function getMediaQuery(string $device): string
+    {
+        $bp = $this->breakpoints[$device] ?? null;
+        if (!$bp) {
+            return '';
+        }
+        if ($bp['min'] !== null && $bp['max'] !== null) {
+            return sprintf('@media (min-width: %dpx) and (max-width: %dpx)', $bp['min'], $bp['max']);
+        }
+        if ($bp['min'] !== null) {
+            return sprintf('@media (min-width: %dpx)', $bp['min']);
+        }
+        if ($bp['max'] !== null) {
+            return sprintf('@media (max-width: %dpx)', $bp['max']);
+        }
+        return '';
     }
 
     /**
