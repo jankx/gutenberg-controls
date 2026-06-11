@@ -63,6 +63,7 @@ class ResponsiveControlTest extends TestCase
         $property->setAccessible(true);
         $attributes = $property->getValue($this->control);
 
+        $this->assertArrayHasKey('hideOnUltrawide', $attributes);
         $this->assertArrayHasKey('hideOnDesktop', $attributes);
         $this->assertArrayHasKey('hideOnTablet', $attributes);
         $this->assertArrayHasKey('hideOnMobile', $attributes);
@@ -76,6 +77,7 @@ class ResponsiveControlTest extends TestCase
         $property->setAccessible(true);
         $attributes = $property->getValue($this->control);
 
+        $this->assertArrayHasKey('colSpanUltrawide', $attributes);
         $this->assertArrayHasKey('colSpanDesktop', $attributes);
         $this->assertArrayHasKey('colSpanTablet', $attributes);
         $this->assertArrayHasKey('colSpanMobile', $attributes);
@@ -91,6 +93,7 @@ class ResponsiveControlTest extends TestCase
         $property->setAccessible(true);
         $attributes = $property->getValue($this->control);
 
+        $this->assertArrayHasKey('orderUltrawide', $attributes);
         $this->assertArrayHasKey('orderDesktop', $attributes);
         $this->assertArrayHasKey('orderTablet', $attributes);
         $this->assertArrayHasKey('orderMobile', $attributes);
@@ -104,6 +107,7 @@ class ResponsiveControlTest extends TestCase
         $property->setAccessible(true);
         $attributes = $property->getValue($this->control);
 
+        $this->assertArrayHasKey('flexDirectionUltrawide', $attributes);
         $this->assertArrayHasKey('flexDirectionDesktop', $attributes);
         $this->assertArrayHasKey('flexDirectionTablet', $attributes);
         $this->assertArrayHasKey('flexDirectionMobile', $attributes);
@@ -117,6 +121,7 @@ class ResponsiveControlTest extends TestCase
         $property->setAccessible(true);
         $attributes = $property->getValue($this->control);
 
+        $this->assertArrayHasKey('textAlignUltrawide', $attributes);
         $this->assertArrayHasKey('textAlignDesktop', $attributes);
         $this->assertArrayHasKey('textAlignTablet', $attributes);
         $this->assertArrayHasKey('textAlignMobile', $attributes);
@@ -136,6 +141,17 @@ class ResponsiveControlTest extends TestCase
     }
 
     /** @test */
+    public function it_generates_visibility_css_for_ultrawide_hide()
+    {
+        $value = ['hideOnUltrawide' => true];
+
+        $css = $this->control->generateCss($value, '.jankx-block');
+
+        $this->assertStringContainsString('@media (min-width: 1600px)', $css);
+        $this->assertStringContainsString('display: none !important', $css);
+    }
+
+    /** @test */
     public function it_generates_visibility_css_for_desktop_hide()
     {
         $value = ['hideOnDesktop' => true];
@@ -152,7 +168,7 @@ class ResponsiveControlTest extends TestCase
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
-        $this->assertStringContainsString('@media (max-width: 1024px)', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px)', $css);
         $this->assertStringContainsString('display: none !important', $css);
     }
 
@@ -172,6 +188,7 @@ class ResponsiveControlTest extends TestCase
     {
         $value = [
             'colSpanDesktop' => 6,
+            'colSpanUltrawide' => 3,
             'colSpanTablet' => 4,
             'colSpanMobile' => 12,
         ];
@@ -180,8 +197,11 @@ class ResponsiveControlTest extends TestCase
 
         // Desktop
         $this->assertStringContainsString('grid-column: span 6 / span 6', $css);
+        // Ultrawide
+        $this->assertStringContainsString('@media (min-width: 1600px)', $css);
+        $this->assertStringContainsString('grid-column: span 3 / span 3', $css);
         // Tablet
-        $this->assertStringContainsString('@media (max-width: 1024px)', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px)', $css);
         $this->assertStringContainsString('grid-column: span 4 / span 4', $css);
         // Mobile
         $this->assertStringContainsString('@media (max-width: 767px)', $css);
@@ -192,23 +212,25 @@ class ResponsiveControlTest extends TestCase
     public function it_skips_duplicate_column_span_values()
     {
         $value = [
+            'colSpanUltrawide' => 6,
             'colSpanDesktop' => 6,
-            'colSpanTablet' => 6, // Same as desktop
-            'colSpanMobile' => 6, // Same as tablet
+            'colSpanTablet' => 6,
+            'colSpanMobile' => 6,
         ];
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
         // Should only have desktop CSS
-        $this->assertStringContainsString('span 6', $css);
-        // Should not have tablet or mobile specific rules
-        $this->assertStringNotContainsString('grid-column: span 6 / span 6', $css);
+        $this->assertStringContainsString('grid-column: span 6 / span 6', $css);
+        // Should not have ultrawide, tablet or mobile specific media query rules
+        $this->assertStringNotContainsString('@media', $css);
     }
 
     /** @test */
     public function it_generates_order_css()
     {
         $value = [
+            'orderUltrawide' => 4,
             'orderDesktop' => 2,
             'orderTablet' => 1,
             'orderMobile' => 3,
@@ -217,7 +239,8 @@ class ResponsiveControlTest extends TestCase
         $css = $this->control->generateCss($value, '.jankx-block');
 
         $this->assertStringContainsString('order: 2', $css);
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { order: 1', $css);
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { order: 4', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { order: 1', $css);
         $this->assertStringContainsString('@media (max-width: 767px) { .jankx-block { order: 3', $css);
     }
 
@@ -233,6 +256,19 @@ class ResponsiveControlTest extends TestCase
     }
 
     /** @test */
+    public function it_generates_flex_direction_css_for_ultrawide()
+    {
+        $value = [
+            'flexDirectionDesktop' => 'row',
+            'flexDirectionUltrawide' => 'row-reverse',
+        ];
+
+        $css = $this->control->generateCss($value, '.jankx-block');
+
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { flex-direction: row-reverse; } }', $css);
+    }
+
+    /** @test */
     public function it_generates_flex_direction_css_for_tablet()
     {
         $value = [
@@ -242,7 +278,7 @@ class ResponsiveControlTest extends TestCase
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { flex-direction: column; } }', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { flex-direction: column; } }', $css);
     }
 
     /** @test */
@@ -267,6 +303,7 @@ class ResponsiveControlTest extends TestCase
     {
         $value = [
             'textAlignDesktop' => 'left',
+            'textAlignUltrawide' => 'center',
             'textAlignTablet' => 'center',
             'textAlignMobile' => 'right',
         ];
@@ -274,7 +311,8 @@ class ResponsiveControlTest extends TestCase
         $css = $this->control->generateCss($value, '.jankx-block');
 
         // Desktop is default left, usually no CSS needed unless explicitly set
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { text-align: center', $css);
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { text-align: center', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { text-align: center', $css);
         $this->assertStringContainsString('@media (max-width: 767px) { .jankx-block { text-align: right', $css);
     }
 
@@ -288,7 +326,20 @@ class ResponsiveControlTest extends TestCase
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { flex-direction: column; } }', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { flex-direction: column; } }', $css);
+    }
+
+    /** @test */
+    public function it_generates_stack_css_for_ultrawide()
+    {
+        $value = [
+            'stackVertically' => true,
+            'stackAtBreakpoint' => 'ultrawide',
+        ];
+
+        $css = $this->control->generateCss($value, '.jankx-block');
+
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { flex-direction: column; } }', $css);
     }
 
     /** @test */
@@ -319,14 +370,18 @@ class ResponsiveControlTest extends TestCase
     public function it_generates_spacing_override_css()
     {
         $value = [
+            'paddingUltrawide' => ['top' => '40px', 'right' => '40px', 'bottom' => '40px', 'left' => '40px'],
             'paddingTablet' => ['top' => '20px', 'right' => '20px', 'bottom' => '20px', 'left' => '20px'],
             'marginMobile' => ['top' => '10px', 'bottom' => '10px'],
         ];
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
+        // Ultrawide padding shorthand
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { padding: 40px; } }', $css);
+
         // Tablet padding shorthand (all same)
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { padding: 20px; } }', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { padding: 20px; } }', $css);
 
         // Mobile margin individual
         $this->assertStringContainsString('@media (max-width: 767px) { .jankx-block {', $css);
@@ -338,13 +393,15 @@ class ResponsiveControlTest extends TestCase
     public function it_generates_font_size_override_css()
     {
         $value = [
+            'fontSizeUltrawide' => '24px',
             'fontSizeTablet' => '14px',
             'fontSizeMobile' => '12px',
         ];
 
         $css = $this->control->generateCss($value, '.jankx-block');
 
-        $this->assertStringContainsString('@media (max-width: 1024px) { .jankx-block { font-size: 14px; } }', $css);
+        $this->assertStringContainsString('@media (min-width: 1600px) { .jankx-block { font-size: 24px; } }', $css);
+        $this->assertStringContainsString('@media (min-width: 768px) and (max-width: 1024px) { .jankx-block { font-size: 14px; } }', $css);
         $this->assertStringContainsString('@media (max-width: 767px) { .jankx-block { font-size: 12px; } }', $css);
     }
 
@@ -367,10 +424,12 @@ class ResponsiveControlTest extends TestCase
         $breakpoints = $this->control->getBreakpoints();
 
         $this->assertIsArray($breakpoints);
+        $this->assertArrayHasKey('ultrawide', $breakpoints);
         $this->assertArrayHasKey('desktop', $breakpoints);
         $this->assertArrayHasKey('tablet', $breakpoints);
         $this->assertArrayHasKey('mobile', $breakpoints);
 
+        $this->assertEquals(1600, $breakpoints['ultrawide']['min']);
         $this->assertEquals(1025, $breakpoints['desktop']['min']);
         $this->assertEquals(768, $breakpoints['tablet']['min']);
         $this->assertEquals(767, $breakpoints['mobile']['max']);

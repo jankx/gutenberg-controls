@@ -118,6 +118,7 @@ export const TypographyControl = ({
     const fontFamily = value.fontFamily || '';
     const useThemeFont = value.useThemeFont ?? true;
     const fontSize = value.fontSize || '';
+    const fontSizeUltrawide = value.fontSizeUltrawide || '';
     const fontSizeTablet = value.fontSizeTablet || '';
     const fontSizeMobile = value.fontSizeMobile || '';
     const fluidTypography = value.fluidTypography || false;
@@ -130,6 +131,7 @@ export const TypographyControl = ({
     const textTransform = value.textTransform || 'none';
     const textDecoration = value.textDecoration || 'none';
     const textAlign = value.textAlign || 'left';
+    const textAlignUltrawide = value.textAlignUltrawide || '';
     const textAlignTablet = value.textAlignTablet || '';
     const textAlignMobile = value.textAlignMobile || '';
 
@@ -459,6 +461,36 @@ export const TypographyControl = ({
                                     </ButtonGroup>
                                 </div>
 
+                                {/* Ultrawide */}
+                                <div className="jankx-typo-device-row">
+                                    <span className="jankx-typo-device-label">
+                                        {__('Ultrawide', 'jankx')}
+                                    </span>
+                                    <ButtonGroup>
+                                        {['left', 'center', 'right', 'justify'].map((align) => (
+                                            <Button
+                                                key={align}
+                                                variant={
+                                                    textAlignUltrawide === align
+                                                        ? 'primary'
+                                                        : 'secondary'
+                                                }
+                                                onClick={() =>
+                                                    updateValue({
+                                                        textAlignUltrawide:
+                                                            textAlignUltrawide === align
+                                                                ? ''
+                                                                : align,
+                                                    })
+                                                }
+                                                size="small"
+                                                icon={`align-${align}`}
+                                                label={align}
+                                            />
+                                        ))}
+                                    </ButtonGroup>
+                                </div>
+
                                 {/* Tablet */}
                                 <div className="jankx-typo-device-row">
                                     <span className="jankx-typo-device-label">
@@ -525,6 +557,19 @@ export const TypographyControl = ({
                                         <div className="jankx-typo-section-title">
                                             {__('Responsive Font Size', 'jankx')}
                                         </div>
+                                        <UnitControl
+                                            label={__('Ultrawide Size', 'jankx')}
+                                            value={fontSizeUltrawide}
+                                            onChange={(newVal) =>
+                                                updateValue({ fontSizeUltrawide: newVal })
+                                            }
+                                            units={[
+                                                { value: 'px', label: 'px', default: 16 },
+                                                { value: 'em', label: 'em', default: 1 },
+                                                { value: 'rem', label: 'rem', default: 1 },
+                                            ]}
+                                            __next40pxDefaultSize
+                                        />
                                         <UnitControl
                                             label={__('Tablet Size', 'jankx')}
                                             value={fontSizeTablet}

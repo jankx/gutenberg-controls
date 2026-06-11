@@ -43,11 +43,48 @@ import {
     stackUp,
 } from '@wordpress/icons';
 
-const DEVICES = [
-    { name: 'desktop', icon: desktop, label: __('Desktop', 'jankx'), width: '100%' },
-    { name: 'tablet', icon: tablet, label: __('Tablet', 'jankx'), width: '768px' },
-    { name: 'mobile', icon: mobile, label: __('Mobile', 'jankx'), width: '360px' },
-];
+/**
+ * Get breakpoint devices from global config, falling back to defaults
+ */
+const getDevices = () => {
+    const bp = window.jankxBlocks?.breakpoints;
+    if (bp) {
+        return Object.keys(bp).map((name) => {
+            const mq = bp[name]?.mediaQuery || '';
+            const width = mq.includes('max-width')
+                ? mq.match(/max-width:\s*(\d+)px/)?.[1] + 'px' || '100%'
+                : '100%';
+            const iconMap = { ultrawide: desktop, desktop, tablet, mobile };
+            return {
+                name,
+                icon: iconMap[name] || desktop,
+                label: __(name.charAt(0).toUpperCase() + name.slice(1), 'jankx'),
+                width,
+            };
+        });
+    }
+    return [
+        { name: 'ultrawide', icon: desktop, label: __('Ultrawide', 'jankx'), width: '100%' },
+        { name: 'desktop', icon: desktop, label: __('Desktop', 'jankx'), width: '100%' },
+        { name: 'tablet', icon: tablet, label: __('Tablet', 'jankx'), width: '768px' },
+        { name: 'mobile', icon: mobile, label: __('Mobile', 'jankx'), width: '360px' },
+    ];
+};
+
+const DEVICES = getDevices();
+
+const getStackPresets = () => {
+    const devices = getDevices();
+    const presets = [
+        { value: 'none', label: __('Never', 'jankx'), icon: layout },
+        ...devices.map((d) => ({
+            value: d.name,
+            label: d.label,
+            icon: d.icon,
+        })),
+    ];
+    return presets;
+};
 
 const FLEX_DIRECTIONS = [
     { value: 'row', label: __('Row', 'jankx'), icon: arrowRight },
@@ -80,11 +117,7 @@ const TEXT_ALIGNMENTS = [
     { value: 'justify', label: __('Justify', 'jankx'), icon: textAlignJustify },
 ];
 
-const STACK_PRESETS = [
-    { value: 'none', label: __('Never', 'jankx'), icon: layout },
-    { value: 'tablet', label: __('Tablet', 'jankx'), icon: tablet },
-    { value: 'mobile', label: __('Mobile', 'jankx'), icon: mobile },
-];
+const STACK_PRESETS = getStackPresets();
 
 const ResponsiveControl = ({
     label,

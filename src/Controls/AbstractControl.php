@@ -68,9 +68,10 @@ abstract class AbstractControl
      * @var array
      */
     protected $breakpoints = [
-        'desktop' => '',
-        'tablet' => '@media (max-width: 1024px)',
-        'mobile' => '@media (max-width: 768px)',
+        'ultrawide' => ['min' => 1600, 'max' => null],
+        'desktop'   => ['min' => 1025, 'max' => null],
+        'tablet'    => ['min' => 768, 'max' => 1024],
+        'mobile'    => ['min' => null, 'max' => 767],
     ];
 
     /**

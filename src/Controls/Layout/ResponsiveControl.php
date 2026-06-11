@@ -26,15 +26,16 @@ class ResponsiveControl extends AbstractControl
     /**
      * Supported devices
      */
-    protected array $devices = ['desktop', 'tablet', 'mobile'];
+    protected array $devices = ['ultrawide', 'desktop', 'tablet', 'mobile'];
 
     /**
      * Default breakpoints
      */
     protected array $breakpoints = [
-        'desktop' => ['min' => 1025, 'max' => null],
-        'tablet'  => ['min' => 768, 'max' => 1024],
-        'mobile'  => ['min' => null, 'max' => 767],
+        'ultrawide' => ['min' => 1600, 'max' => null],
+        'desktop'   => ['min' => 1025, 'max' => 1599],
+        'tablet'    => ['min' => 768, 'max' => 1024],
+        'mobile'    => ['min' => null, 'max' => 767],
     ];
 
     /**
@@ -42,38 +43,45 @@ class ResponsiveControl extends AbstractControl
      */
     protected array $attributes = [
         // Visibility on devices
-        'hideOnDesktop' => ['type' => 'boolean', 'default' => false],
-        'hideOnTablet'  => ['type' => 'boolean', 'default' => false],
-        'hideOnMobile'  => ['type' => 'boolean', 'default' => false],
+        'hideOnUltrawide' => ['type' => 'boolean', 'default' => false],
+        'hideOnDesktop'   => ['type' => 'boolean', 'default' => false],
+        'hideOnTablet'    => ['type' => 'boolean', 'default' => false],
+        'hideOnMobile'    => ['type' => 'boolean', 'default' => false],
 
         // Column span per device (for grid systems)
-        'colSpanDesktop' => ['type' => 'number', 'default' => 12],
-        'colSpanTablet'  => ['type' => 'number', 'default' => 12],
-        'colSpanMobile'  => ['type' => 'number', 'default' => 12],
+        'colSpanUltrawide' => ['type' => 'number', 'default' => 12],
+        'colSpanDesktop'   => ['type' => 'number', 'default' => 12],
+        'colSpanTablet'    => ['type' => 'number', 'default' => 12],
+        'colSpanMobile'    => ['type' => 'number', 'default' => 12],
 
         // Order per device
-        'orderDesktop' => ['type' => 'number', 'default' => 0],
-        'orderTablet'  => ['type' => 'number', 'default' => null],
-        'orderMobile'  => ['type' => 'number', 'default' => null],
+        'orderUltrawide' => ['type' => 'number', 'default' => null],
+        'orderDesktop'   => ['type' => 'number', 'default' => 0],
+        'orderTablet'    => ['type' => 'number', 'default' => null],
+        'orderMobile'    => ['type' => 'number', 'default' => null],
 
         // Flex direction per device
-        'flexDirectionDesktop' => ['type' => 'string', 'default' => 'row'],
-        'flexDirectionTablet'  => ['type' => 'string', 'default' => null],
-        'flexDirectionMobile'  => ['type' => 'string', 'default' => null],
+        'flexDirectionUltrawide' => ['type' => 'string', 'default' => null],
+        'flexDirectionDesktop'   => ['type' => 'string', 'default' => 'row'],
+        'flexDirectionTablet'    => ['type' => 'string', 'default' => null],
+        'flexDirectionMobile'    => ['type' => 'string', 'default' => null],
 
         // Alignment per device
-        'alignItemsDesktop' => ['type' => 'string', 'default' => 'stretch'],
-        'alignItemsTablet'  => ['type' => 'string', 'default' => null],
-        'alignItemsMobile'  => ['type' => 'string', 'default' => null],
+        'alignItemsUltrawide' => ['type' => 'string', 'default' => null],
+        'alignItemsDesktop'   => ['type' => 'string', 'default' => 'stretch'],
+        'alignItemsTablet'    => ['type' => 'string', 'default' => null],
+        'alignItemsMobile'    => ['type' => 'string', 'default' => null],
 
-        'justifyContentDesktop' => ['type' => 'string', 'default' => 'flex-start'],
-        'justifyContentTablet'  => ['type' => 'string', 'default' => null],
-        'justifyContentMobile'  => ['type' => 'string', 'default' => null],
+        'justifyContentUltrawide' => ['type' => 'string', 'default' => null],
+        'justifyContentDesktop'   => ['type' => 'string', 'default' => 'flex-start'],
+        'justifyContentTablet'    => ['type' => 'string', 'default' => null],
+        'justifyContentMobile'    => ['type' => 'string', 'default' => null],
 
         // Text alignment per device
-        'textAlignDesktop' => ['type' => 'string', 'default' => 'left'],
-        'textAlignTablet'  => ['type' => 'string', 'default' => null],
-        'textAlignMobile'  => ['type' => 'string', 'default' => null],
+        'textAlignUltrawide' => ['type' => 'string', 'default' => null],
+        'textAlignDesktop'   => ['type' => 'string', 'default' => 'left'],
+        'textAlignTablet'    => ['type' => 'string', 'default' => null],
+        'textAlignMobile'    => ['type' => 'string', 'default' => null],
 
         // Stack behavior
         'stackVertically'     => ['type' => 'boolean', 'default' => false],
@@ -81,15 +89,20 @@ class ResponsiveControl extends AbstractControl
         'reverseStackOrder'   => ['type' => 'boolean', 'default' => false],
 
         // Spacing overrides per device
-        'paddingMobile'   => ['type' => 'object', 'default' => []],
-        'marginMobile'    => ['type' => 'object', 'default' => []],
-        'paddingTablet'   => ['type' => 'object', 'default' => []],
-        'marginTablet'    => ['type' => 'object', 'default' => []],
+        'paddingUltrawide' => ['type' => 'object', 'default' => []],
+        'marginUltrawide'  => ['type' => 'object', 'default' => []],
+        'paddingDesktop'   => ['type' => 'object', 'default' => []],
+        'marginDesktop'    => ['type' => 'object', 'default' => []],
+        'paddingTablet'    => ['type' => 'object', 'default' => []],
+        'marginTablet'     => ['type' => 'object', 'default' => []],
+        'paddingMobile'    => ['type' => 'object', 'default' => []],
+        'marginMobile'     => ['type' => 'object', 'default' => []],
 
         // Font size overrides
-        'fontSizeDesktop' => ['type' => 'string', 'default' => null],
-        'fontSizeTablet'  => ['type' => 'string', 'default' => null],
-        'fontSizeMobile'  => ['type' => 'string', 'default' => null],
+        'fontSizeUltrawide' => ['type' => 'string', 'default' => null],
+        'fontSizeDesktop'   => ['type' => 'string', 'default' => null],
+        'fontSizeTablet'    => ['type' => 'string', 'default' => null],
+        'fontSizeMobile'    => ['type' => 'string', 'default' => null],
     ];
 
     /**
@@ -113,6 +126,9 @@ class ResponsiveControl extends AbstractControl
      */
     public function generateCss($value, string $selector): string
     {
+        // Apply breakpoint filter so theme options can override
+        $this->breakpoints = apply_filters('jankx_responsive_breakpoints', $this->breakpoints);
+
         $css = '';
 
         // Generate visibility CSS
@@ -152,16 +168,23 @@ class ResponsiveControl extends AbstractControl
     {
         $css = '';
 
+        if (!empty($value['hideOnUltrawide'])) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf("%s { %s { display: none !important; } }\n", $mq, $selector);
+        }
+
         if (!empty($value['hideOnDesktop'])) {
             $css .= sprintf("%s { display: none !important; }\n", $selector);
         }
 
         if (!empty($value['hideOnTablet'])) {
-            $css .= sprintf("@media (max-width: 1024px) { %s { display: none !important; } }\n", $selector);
+            $mq = $this->getMediaQuery('tablet');
+            $css .= sprintf("%s { %s { display: none !important; } }\n", $mq, $selector);
         }
 
         if (!empty($value['hideOnMobile'])) {
-            $css .= sprintf("@media (max-width: 767px) { %s { display: none !important; } }\n", $selector);
+            $mq = $this->getMediaQuery('mobile');
+            $css .= sprintf("%s { %s { display: none !important; } }\n", $mq, $selector);
         }
 
         return $css;
@@ -183,11 +206,26 @@ class ResponsiveControl extends AbstractControl
             $desktopSpan
         );
 
+        // Ultrawide
+        $ultrawideSpan = $value['colSpanUltrawide'] ?? null;
+        if ($ultrawideSpan !== null && $ultrawideSpan !== $desktopSpan) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { grid-column: span %d / span %d; } }\n",
+                $mq,
+                $selector,
+                $ultrawideSpan,
+                $ultrawideSpan
+            );
+        }
+
         // Tablet
         $tabletSpan = $value['colSpanTablet'] ?? null;
         if ($tabletSpan !== null && $tabletSpan !== $desktopSpan) {
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { grid-column: span %d / span %d; } }\n",
+                "%s { %s { grid-column: span %d / span %d; } }\n",
+                $mq,
                 $selector,
                 $tabletSpan,
                 $tabletSpan
@@ -197,8 +235,10 @@ class ResponsiveControl extends AbstractControl
         // Mobile
         $mobileSpan = $value['colSpanMobile'] ?? null;
         if ($mobileSpan !== null && $mobileSpan !== ($tabletSpan ?? $desktopSpan)) {
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { grid-column: span %d / span %d; } }\n",
+                "%s { %s { grid-column: span %d / span %d; } }\n",
+                $mq,
                 $selector,
                 $mobileSpan,
                 $mobileSpan
@@ -221,11 +261,25 @@ class ResponsiveControl extends AbstractControl
             $css .= sprintf("%s { order: %d; }\n", $selector, $desktopOrder);
         }
 
+        // Ultrawide
+        $ultrawideOrder = $value['orderUltrawide'] ?? null;
+        if ($ultrawideOrder !== null && $ultrawideOrder !== $desktopOrder) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { order: %d; } }\n",
+                $mq,
+                $selector,
+                $ultrawideOrder
+            );
+        }
+
         // Tablet
         $tabletOrder = $value['orderTablet'] ?? null;
         if ($tabletOrder !== null) {
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { order: %d; } }\n",
+                "%s { %s { order: %d; } }\n",
+                $mq,
                 $selector,
                 $tabletOrder
             );
@@ -234,8 +288,10 @@ class ResponsiveControl extends AbstractControl
         // Mobile
         $mobileOrder = $value['orderMobile'] ?? null;
         if ($mobileOrder !== null && $mobileOrder !== $tabletOrder) {
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { order: %d; } }\n",
+                "%s { %s { order: %d; } }\n",
+                $mq,
                 $selector,
                 $mobileOrder
             );
@@ -254,11 +310,25 @@ class ResponsiveControl extends AbstractControl
         // Desktop
         $desktopDir = $value['flexDirectionDesktop'] ?? 'row';
 
+        // Ultrawide
+        $ultrawideDir = $value['flexDirectionUltrawide'] ?? null;
+        if ($ultrawideDir !== null && $ultrawideDir !== $desktopDir) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { flex-direction: %s; } }\n",
+                $mq,
+                $selector,
+                $ultrawideDir
+            );
+        }
+
         // Tablet
         $tabletDir = $value['flexDirectionTablet'] ?? null;
         if ($tabletDir !== null && $tabletDir !== $desktopDir) {
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { flex-direction: %s; } }\n",
+                "%s { %s { flex-direction: %s; } }\n",
+                $mq,
                 $selector,
                 $tabletDir
             );
@@ -267,8 +337,10 @@ class ResponsiveControl extends AbstractControl
         // Mobile
         $mobileDir = $value['flexDirectionMobile'] ?? null;
         if ($mobileDir !== null && $mobileDir !== ($tabletDir ?? $desktopDir)) {
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { flex-direction: %s; } }\n",
+                "%s { %s { flex-direction: %s; } }\n",
+                $mq,
                 $selector,
                 $mobileDir
             );
@@ -288,6 +360,23 @@ class ResponsiveControl extends AbstractControl
         $desktopAlign = $value['alignItemsDesktop'] ?? 'stretch';
         $desktopJustify = $value['justifyContentDesktop'] ?? 'flex-start';
 
+        // Ultrawide
+        $ultrawideAlign = $value['alignItemsUltrawide'] ?? null;
+        $ultrawideJustify = $value['justifyContentUltrawide'] ?? null;
+
+        if ($ultrawideAlign !== null || $ultrawideJustify !== null) {
+            $ultrawideAlignCss = $ultrawideAlign ?? $desktopAlign;
+            $ultrawideJustifyCss = $ultrawideJustify ?? $desktopJustify;
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { align-items: %s; justify-content: %s; } }\n",
+                $mq,
+                $selector,
+                $ultrawideAlignCss,
+                $ultrawideJustifyCss
+            );
+        }
+
         // Tablet
         $tabletAlign = $value['alignItemsTablet'] ?? null;
         $tabletJustify = $value['justifyContentTablet'] ?? null;
@@ -295,8 +384,10 @@ class ResponsiveControl extends AbstractControl
         if ($tabletAlign !== null || $tabletJustify !== null) {
             $tabletAlignCss = $tabletAlign ?? $desktopAlign;
             $tabletJustifyCss = $tabletJustify ?? $desktopJustify;
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { align-items: %s; justify-content: %s; } }\n",
+                "%s { %s { align-items: %s; justify-content: %s; } }\n",
+                $mq,
                 $selector,
                 $tabletAlignCss,
                 $tabletJustifyCss
@@ -311,8 +402,10 @@ class ResponsiveControl extends AbstractControl
             ($mobileJustify !== null && $mobileJustify !== ($tabletJustify ?? $desktopJustify))) {
             $mobileAlignCss = $mobileAlign ?? ($tabletAlign ?? $desktopAlign);
             $mobileJustifyCss = $mobileJustify ?? ($tabletJustify ?? $desktopJustify);
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { align-items: %s; justify-content: %s; } }\n",
+                "%s { %s { align-items: %s; justify-content: %s; } }\n",
+                $mq,
                 $selector,
                 $mobileAlignCss,
                 $mobileJustifyCss
@@ -332,11 +425,25 @@ class ResponsiveControl extends AbstractControl
         // Desktop
         $desktopAlign = $value['textAlignDesktop'] ?? 'left';
 
+        // Ultrawide
+        $ultrawideAlign = $value['textAlignUltrawide'] ?? null;
+        if ($ultrawideAlign !== null && $ultrawideAlign !== $desktopAlign) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { text-align: %s; } }\n",
+                $mq,
+                $selector,
+                $ultrawideAlign
+            );
+        }
+
         // Tablet
         $tabletAlign = $value['textAlignTablet'] ?? null;
         if ($tabletAlign !== null && $tabletAlign !== $desktopAlign) {
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { text-align: %s; } }\n",
+                "%s { %s { text-align: %s; } }\n",
+                $mq,
                 $selector,
                 $tabletAlign
             );
@@ -345,8 +452,10 @@ class ResponsiveControl extends AbstractControl
         // Mobile
         $mobileAlign = $value['textAlignMobile'] ?? null;
         if ($mobileAlign !== null && $mobileAlign !== ($tabletAlign ?? $desktopAlign)) {
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { text-align: %s; } }\n",
+                "%s { %s { text-align: %s; } }\n",
+                $mq,
                 $selector,
                 $mobileAlign
             );
@@ -362,13 +471,49 @@ class ResponsiveControl extends AbstractControl
     {
         $css = '';
 
+        // Ultrawide spacing
+        if (!empty($value['paddingUltrawide'])) {
+            $css .= $this->generateResponsiveSpacing(
+                $value['paddingUltrawide'],
+                $selector,
+                'padding',
+                'ultrawide'
+            );
+        }
+        if (!empty($value['marginUltrawide'])) {
+            $css .= $this->generateResponsiveSpacing(
+                $value['marginUltrawide'],
+                $selector,
+                'margin',
+                'ultrawide'
+            );
+        }
+
+        // Desktop spacing (base - no media query)
+        if (!empty($value['paddingDesktop'])) {
+            $css .= $this->generateResponsiveSpacing(
+                $value['paddingDesktop'],
+                $selector,
+                'padding',
+                'desktop'
+            );
+        }
+        if (!empty($value['marginDesktop'])) {
+            $css .= $this->generateResponsiveSpacing(
+                $value['marginDesktop'],
+                $selector,
+                'margin',
+                'desktop'
+            );
+        }
+
         // Tablet spacing
         if (!empty($value['paddingTablet'])) {
             $css .= $this->generateResponsiveSpacing(
                 $value['paddingTablet'],
                 $selector,
                 'padding',
-                1024
+                'tablet'
             );
         }
         if (!empty($value['marginTablet'])) {
@@ -376,7 +521,7 @@ class ResponsiveControl extends AbstractControl
                 $value['marginTablet'],
                 $selector,
                 'margin',
-                1024
+                'tablet'
             );
         }
 
@@ -386,7 +531,7 @@ class ResponsiveControl extends AbstractControl
                 $value['paddingMobile'],
                 $selector,
                 'padding',
-                767
+                'mobile'
             );
         }
         if (!empty($value['marginMobile'])) {
@@ -394,7 +539,7 @@ class ResponsiveControl extends AbstractControl
                 $value['marginMobile'],
                 $selector,
                 'margin',
-                767
+                'mobile'
             );
         }
 
@@ -408,7 +553,7 @@ class ResponsiveControl extends AbstractControl
         array $spacing,
         string $selector,
         string $property,
-        int $breakpoint
+        string $device
     ): string {
         $sides = ['top', 'right', 'bottom', 'left'];
         $values = [];
@@ -421,18 +566,41 @@ class ResponsiveControl extends AbstractControl
         $uniqueValues = array_unique(array_values($values));
         $isShorthand = count($uniqueValues) === 1;
 
+        // Desktop base - no media query
+        if ($device === 'desktop') {
+            if ($isShorthand && $uniqueValues[0] !== '0') {
+                return sprintf(
+                    "%s { %s: %s; }\n",
+                    $selector,
+                    $property,
+                    $uniqueValues[0]
+                );
+            }
+
+            $css = sprintf("%s {\n", $selector);
+            foreach ($values as $side => $val) {
+                if ($val !== '0') {
+                    $css .= sprintf("    %s-%s: %s;\n", $property, $side, $val);
+                }
+            }
+            $css .= "}\n";
+            return $css;
+        }
+
+        // Other devices - wrap in media query
+        $mq = $this->getMediaQuery($device);
+
         if ($isShorthand && $uniqueValues[0] !== '0') {
             return sprintf(
-                "@media (max-width: %dpx) { %s { %s: %s; } }\n",
-                $breakpoint,
+                "%s { %s { %s: %s; } }\n",
+                $mq,
                 $selector,
                 $property,
                 $uniqueValues[0]
             );
         }
 
-        // Generate individual properties
-        $css = sprintf("@media (max-width: %dpx) { %s {\n", $breakpoint, $selector);
+        $css = sprintf("%s { %s {\n", $mq, $selector);
         foreach ($values as $side => $val) {
             if ($val !== '0') {
                 $css .= sprintf("    %s-%s: %s;\n", $property, $side, $val);
@@ -450,10 +618,23 @@ class ResponsiveControl extends AbstractControl
     {
         $css = '';
 
+        // Ultrawide
+        if (!empty($value['fontSizeUltrawide'])) {
+            $mq = $this->getMediaQuery('ultrawide');
+            $css .= sprintf(
+                "%s { %s { font-size: %s; } }\n",
+                $mq,
+                $selector,
+                $value['fontSizeUltrawide']
+            );
+        }
+
         // Tablet
         if (!empty($value['fontSizeTablet'])) {
+            $mq = $this->getMediaQuery('tablet');
             $css .= sprintf(
-                "@media (max-width: 1024px) { %s { font-size: %s; } }\n",
+                "%s { %s { font-size: %s; } }\n",
+                $mq,
                 $selector,
                 $value['fontSizeTablet']
             );
@@ -461,8 +642,10 @@ class ResponsiveControl extends AbstractControl
 
         // Mobile
         if (!empty($value['fontSizeMobile'])) {
+            $mq = $this->getMediaQuery('mobile');
             $css .= sprintf(
-                "@media (max-width: 767px) { %s { font-size: %s; } }\n",
+                "%s { %s { font-size: %s; } }\n",
+                $mq,
                 $selector,
                 $value['fontSizeMobile']
             );
@@ -483,20 +666,22 @@ class ResponsiveControl extends AbstractControl
         }
 
         $breakpoint = $value['stackAtBreakpoint'] ?? 'mobile';
-        $maxWidth = $breakpoint === 'tablet' ? 1024 : 767;
+
+        // Use dynamic media query from breakpoint config
+        $mediaQuery = $this->getMediaQuery($breakpoint);
 
         // Flex direction column
         $css .= sprintf(
-            "@media (max-width: %dpx) { %s { flex-direction: column; } }\n",
-            $maxWidth,
+            "%s { %s { flex-direction: column; } }\n",
+            $mediaQuery,
             $selector
         );
 
         // Reverse order if enabled
         if (!empty($value['reverseStackOrder'])) {
             $css .= sprintf(
-                "@media (max-width: %dpx) { %s { flex-direction: column-reverse; } }\n",
-                $maxWidth,
+                "%s { %s { flex-direction: column-reverse; } }\n",
+                $mediaQuery,
                 $selector
             );
         }
@@ -510,6 +695,29 @@ class ResponsiveControl extends AbstractControl
     public function getBreakpoints(): array
     {
         return $this->breakpoints;
+    }
+
+    /**
+     * Generate media query string from breakpoint config
+     */
+    protected function getMediaQuery(string $device): string
+    {
+        $bp = $this->breakpoints[$device] ?? null;
+        if (!$bp) {
+            return '';
+        }
+
+        if ($bp['min'] !== null && $bp['max'] !== null) {
+            return sprintf('@media (min-width: %dpx) and (max-width: %dpx)', $bp['min'], $bp['max']);
+        }
+        if ($bp['min'] !== null) {
+            return sprintf('@media (min-width: %dpx)', $bp['min']);
+        }
+        if ($bp['max'] !== null) {
+            return sprintf('@media (max-width: %dpx)', $bp['max']);
+        }
+
+        return '';
     }
 
     /**

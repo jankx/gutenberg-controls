@@ -206,6 +206,12 @@ const VisualSpacingControl = ({
                 <ButtonGroup className="jankx-device-selector">
                     <Button
                         icon={deviceDesktop}
+                        variant={activeDevice === 'ultrawide' ? 'primary' : 'secondary'}
+                        onClick={() => setActiveDevice('ultrawide')}
+                        size="small"
+                    />
+                    <Button
+                        icon={deviceDesktop}
                         variant={activeDevice === 'desktop' ? 'primary' : 'secondary'}
                         onClick={() => setActiveDevice('desktop')}
                         size="small"
