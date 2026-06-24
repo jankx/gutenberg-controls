@@ -7,14 +7,14 @@
 
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { InspectorControls, BlockControls } from '@wordpress/block-editor';
-import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { InspectorControls, BlockControls, FontSizePicker } from '@wordpress/block-editor';
+import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton, Tooltip, BaseControl, Button, ButtonGroup } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
-import { __ } from '@wordpress/i18n';
-import { useState, useCallback, useRef } from '@wordpress/element';
-import { undo, redo, cloudUpload, file } from '@wordpress/icons';
+import { __, sprintf } from '@wordpress/i18n';
+import { useState, useCallback, useRef, useMemo } from '@wordpress/element';
+import { undo, redo, cloudUpload, desktop, tablet, mobile, file } from '@wordpress/icons';
 
 // Import custom controls
 import PresetPanel from './inspector/PresetPanel';
@@ -34,15 +34,110 @@ import { TemplateLibrary, TemplateExportButton } from './components/TemplateLibr
 import './styles/editor.scss';
 
 /**
+ * Responsive Font Size device buttons + FontSizePicker
+ */
+const FONT_SIZE_DEVICES = [
+    { name: 'ultrawide', label: __('Ultrawide', 'jankx'), icon: desktop },
+    { name: 'desktop', label: __('Desktop', 'jankx'), icon: desktop },
+    { name: 'tablet', label: __('Tablet', 'jankx'), icon: tablet },
+    { name: 'mobile', label: __('Mobile', 'jankx'), icon: mobile },
+];
+
+const ResponsiveFontSizeContent = ({ device, onDeviceChange, value, onChange }) => (
+    <div className="jankx-responsive-font-size">
+        <ButtonGroup style={{ marginBottom: 12, display: 'flex', gap: 2 }}>
+            {FONT_SIZE_DEVICES.map((d) => (
+                <Tooltip key={d.name} text={d.label}>
+                    <Button
+                        icon={d.icon}
+                        variant={device === d.name ? 'primary' : 'secondary'}
+                        onClick={() => onDeviceChange(d.name)}
+                        size="small"
+                    />
+                </Tooltip>
+            ))}
+        </ButtonGroup>
+        <BaseControl
+            label={sprintf(__('Font Size (%s)', 'jankx'), FONT_SIZE_DEVICES.find(d => d.name === device)?.label || device)}
+        >
+            <FontSizePicker
+                value={value}
+                onChange={onChange}
+                withReset={false}
+                __nextHasNoMarginBottom
+            />
+        </BaseControl>
+    </div>
+);
+
+/**
+ * Cache wrapped components to prevent duplicate renders in StrictMode
+ */
+const wrappedComponentCache = new WeakMap();
+
+/**
  * Add Jankx controls inspector panel to supported blocks
  */
 const withJankxControls = createHigherOrderComponent((BlockEdit) => {
-    return (props) => {
+    // Return cached wrapper if exists (avoids StrictMode double-mounting)
+    if (wrappedComponentCache.has(BlockEdit)) {
+        return wrappedComponentCache.get(BlockEdit);
+    }
+
+    const WrappedBlockEdit = (props) => {
         const { name, attributes, setAttributes, isSelected } = props;
 
-        // Only add to Jankx blocks
-        if (!name.startsWith('jankx/')) {
-            return <BlockEdit {...props} />;
+        // Debug: track render count
+        const renderCount = React.useRef(0);
+        renderCount.current++;
+        if (window.jankxDebug === undefined) window.jankxDebug = {};
+        if (window.jankxDebug[name] === undefined) window.jankxDebug[name] = 0;
+        window.jankxDebug[name]++;
+        // eslint-disable-next-line no-console
+        console.log(`[JankxControls] ${name} render #${window.jankxDebug[name]} (instance: ${renderCount.current})`);
+
+        const blockType = wp.blocks?.getBlockType?.(name);
+        const supportsFontSize = blockType?.supports?.typography?.fontSize;
+        const isJankxBlock = name.startsWith('jankx/');
+
+        // For non-Jankx blocks, only add responsive font-size if supported
+        if (!isJankxBlock) {
+            if (!supportsFontSize) {
+                return <BlockEdit {...props} />;
+            }
+
+            const responsiveFs = attributes.jankxResponsiveFontSize || {};
+            const [fsDevice, setFsDevice] = useState('desktop');
+
+            const updateResponsiveFontSize = (device, value) => {
+                setAttributes({
+                    jankxResponsiveFontSize: {
+                        ...responsiveFs,
+                        [device]: value || undefined,
+                    },
+                });
+            };
+
+            return (
+                <>
+                    <BlockEdit {...props} />
+                    {isSelected && useMemo(() => (
+                        <InspectorControls>
+                            <PanelBody
+                                title={__('Responsive Font Size', 'jankx')}
+                                initialOpen={false}
+                            >
+                                <ResponsiveFontSizeContent
+                                    device={fsDevice}
+                                    onDeviceChange={setFsDevice}
+                                    value={responsiveFs[fsDevice] || attributes.fontSize || undefined}
+                                    onChange={(val) => updateResponsiveFontSize(fsDevice, val)}
+                                />
+                            </PanelBody>
+                        </InspectorControls>
+                    ), [isSelected])}
+                </>
+            );
         }
 
         // Get block configuration
@@ -299,7 +394,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                 <BlockEdit {...props} />
 
                 {/* Block Toolbar - Template Library */}
-                {isSelected && (
+                {isSelected && useMemo(() => (
                     <BlockControls group="other">
                         <ToolbarGroup>
                             <TemplateExportButton clientId={props.clientId} />
@@ -310,7 +405,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                             />
                         </ToolbarGroup>
                     </BlockControls>
-                )}
+                ), [isSelected])}
 
                 {/* Template Library Modal */}
                 {isTemplateLibraryOpen && (
@@ -323,7 +418,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                 )}
 
                 {/* Inspector Controls */}
-                {isSelected && (
+                {isSelected && useMemo(() => (
                     <InspectorControls group="styles">
                         <TabPanel
                             className="jankx-inspector-tabs"
@@ -474,14 +569,17 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                             }}
                         </TabPanel>
                     </InspectorControls>
-                )}
+                ), [isSelected])}
             </>
         );
     };
+
+    wrappedComponentCache.set(BlockEdit, WrappedBlockEdit);
+    return WrappedBlockEdit;
 }, 'withJankxControls');
 
 /**
- * Register the HOC filter
+ * Register the HOC filter (single filter for all Jankx features)
  */
 addFilter(
     'editor.BlockEdit',
@@ -496,19 +594,27 @@ addFilter(
     'blocks.registerBlockType',
     'jankx/gutenberg-controls/add-attributes',
     (settings, name) => {
-        if (!name.startsWith('jankx/')) {
-            return settings;
+        const supportsFontSize = settings?.supports?.typography?.fontSize;
+
+        const newAttrs = {
+            ...settings.attributes,
+            jankxControls: {
+                type: 'object',
+                default: {},
+            },
+        };
+
+        // Add responsiveFontSize attribute for blocks that support typography.fontSize
+        if (supportsFontSize) {
+            newAttrs.jankxResponsiveFontSize = {
+                type: 'object',
+                default: {},
+            };
         }
 
         return {
             ...settings,
-            attributes: {
-                ...settings.attributes,
-                jankxControls: {
-                    type: 'object',
-                    default: {},
-                },
-            },
+            attributes: newAttrs,
         };
     }
 );
