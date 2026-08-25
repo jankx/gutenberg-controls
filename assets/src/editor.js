@@ -76,6 +76,84 @@ const ResponsiveFontSizeContent = ({ device, onDeviceChange, value, onChange }) 
 const EMPTY_OBJECT = {};
 
 /**
+ * JankxBlockToolbar - Toolbar button for template library
+ */
+const JankxBlockToolbar = ({ clientId, onOpenTemplateLibrary }) => (
+    <BlockControls>
+        <ToolbarGroup>
+            <Tooltip text={__('Template Library', 'jankx')}>
+                <ToolbarButton
+                    icon={file}
+                    label={__('Template Library', 'jankx')}
+                    onClick={onOpenTemplateLibrary}
+                />
+            </Tooltip>
+        </ToolbarGroup>
+    </BlockControls>
+);
+
+/**
+ * JankxInspectorControls - Full inspector panel for Jankx blocks
+ */
+const JankxInspectorControls = ({
+    blockConfig,
+    presets,
+    categories,
+    jankxControls,
+    applyPreset,
+    undoPreset,
+    redoPreset,
+    renderControl,
+    historyIndexRef,
+    historyRef,
+    setCustomPresets,
+}) => {
+    const controls = blockConfig.controls || {};
+    const hasPresets = presets && presets.length > 0;
+
+    return (
+        <InspectorControls>
+            {hasPresets && (
+                <PresetPanel
+                    presets={presets}
+                    categories={categories || []}
+                    currentValues={jankxControls}
+                    onApplyPreset={(preset) => applyPreset(preset, preset.title || 'Preset')}
+                />
+            )}
+
+            {Object.keys(controls).length > 0 && (
+                <PanelBody title={__('Design Controls', 'jankx')} initialOpen={true}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                        <Tooltip text={__('Undo', 'jankx')}>
+                            <Button
+                                icon={undo}
+                                size="small"
+                                variant="tertiary"
+                                disabled={historyIndexRef.current <= 0}
+                                onClick={undoPreset}
+                            />
+                        </Tooltip>
+                        <Tooltip text={__('Redo', 'jankx')}>
+                            <Button
+                                icon={redo}
+                                size="small"
+                                variant="tertiary"
+                                disabled={historyIndexRef.current >= historyRef.current.length - 1}
+                                onClick={redoPreset}
+                            />
+                        </Tooltip>
+                    </div>
+                    {Object.entries(controls).map(([controlName, controlConfig]) =>
+                        renderControl(controlName, controlConfig)
+                    )}
+                </PanelBody>
+            )}
+        </InspectorControls>
+    );
+};
+
+/**
  * Responsive Font Size controls for non-Jankx blocks
  */
 const NonJankxResponsiveFontSize = ({ props }) => {
@@ -113,6 +191,18 @@ const NonJankxResponsiveFontSize = ({ props }) => {
 
 const withJankxControls = createHigherOrderComponent((BlockEdit) => {
     return (props) => {
+        // === DEBUG LOGGING FOR REACT ERROR #130 ===
+        if (window.jankxControlDebugHasRun !== true) {
+            console.log('🛠 [Gutenberg Controls Editor] Checking imports for React #130:');
+            const componentsToCheck = { JankxBlockToolbar, JankxInspectorControls, TemplateLibrary, PresetPanel, VisualSpacingControl, ResponsiveWrapper };
+            console.log(componentsToCheck);
+            Object.entries(componentsToCheck).forEach(([name, c]) => {
+                if (c === undefined) console.error(`🚨 FATAL: Component "${name}" is undefined in editor.js!`);
+            });
+            window.jankxControlDebugHasRun = true;
+        }
+        // ==========================================
+
         const { attributes, setAttributes, isSelected, name } = props;
 
         // Get block configuration
