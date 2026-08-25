@@ -4,8 +4,7 @@ const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const config = Array.isArray(defaultConfig) ? defaultConfig[0] : defaultConfig;
 
 config.entry = {
-    editor: path.resolve(__dirname, 'assets/src/editor.js'),
-    frontend: path.resolve(__dirname, 'assets/src/frontend.js'),
+    editor: path.resolve(__dirname, 'assets/src/editor.js')
 };
 
 config.output = {

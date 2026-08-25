@@ -76,9 +76,6 @@ class BlockRegistry
         // Enqueue editor assets
         add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorAssets']);
 
-        // Enqueue frontend assets
-        add_action('wp_enqueue_scripts', [$this, 'enqueueFrontendAssets']);
-
         // Filter block registration
         add_filter('register_block_type_args', [$this, 'filterBlockArgs'], 10, 2);
     }
@@ -174,36 +171,7 @@ class BlockRegistry
         }
     }
 
-    /**
-     * Enqueue shared frontend assets
-     *
-     * @return void
-     */
-    public function enqueueFrontendAssets(): void
-    {
-        // Frontend animation engine
-        wp_enqueue_script(
-            'jankx-frontend',
-            $this->getAssetUrl('assets/build/frontend.js'),
-            [],
-            '1.0.0',
-            true
-        );
-
-        // Frontend styles
-        wp_enqueue_style(
-            'jankx-frontend',
-            $this->getAssetUrl('assets/build/frontend.css'),
-            [],
-            '1.0.0'
-        );
-
-        // Enqueue individual block frontend assets
-        foreach ($this->blocks as $block) {
-            $block->enqueueFrontendAssets();
-        }
-    }
-
+    
     /**
      * Filter block type args
      *

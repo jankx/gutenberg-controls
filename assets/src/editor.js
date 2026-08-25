@@ -118,24 +118,26 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                 });
             };
 
+            const responsiveFontSizePanel = useMemo(() => (
+                <InspectorControls>
+                    <PanelBody
+                        title={__('Responsive Font Size', 'jankx')}
+                        initialOpen={false}
+                    >
+                        <ResponsiveFontSizeContent
+                            device={fsDevice}
+                            onDeviceChange={setFsDevice}
+                            value={responsiveFs[fsDevice] || attributes.fontSize || undefined}
+                            onChange={(val) => updateResponsiveFontSize(fsDevice, val)}
+                        />
+                    </PanelBody>
+                </InspectorControls>
+            ), [fsDevice, responsiveFs, attributes.fontSize]);
+
             return (
                 <>
                     <BlockEdit {...props} />
-                    {isSelected && useMemo(() => (
-                        <InspectorControls>
-                            <PanelBody
-                                title={__('Responsive Font Size', 'jankx')}
-                                initialOpen={false}
-                            >
-                                <ResponsiveFontSizeContent
-                                    device={fsDevice}
-                                    onDeviceChange={setFsDevice}
-                                    value={responsiveFs[fsDevice] || attributes.fontSize || undefined}
-                                    onChange={(val) => updateResponsiveFontSize(fsDevice, val)}
-                                />
-                            </PanelBody>
-                        </InspectorControls>
-                    ), [isSelected])}
+                    {isSelected && responsiveFontSizePanel}
                 </>
             );
         }
@@ -389,25 +391,168 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
             return renderContent();
         };
 
+        const blockControlsPanel = useMemo(() => (
+            <BlockControls group="other">
+                <ToolbarGroup>
+                    <TemplateExportButton clientId={props.clientId} />
+                    <ToolbarButton
+                        icon={cloudUpload}
+                        label={__('Import Template', 'jankx')}
+                        onClick={() => setIsTemplateLibraryOpen(true)}
+                    />
+                </ToolbarGroup>
+            </BlockControls>
+        ), [props.clientId]);
+
+        const inspectorPanel = useMemo(() => (
+            <InspectorControls group="styles">
+                <TabPanel
+                    className="jankx-inspector-tabs"
+                    activeClass="is-active"
+                    tabs={[
+                        {
+                            name: 'presets',
+                            title: __('Presets', 'jankx'),
+                        },
+                        {
+                            name: 'layout',
+                            title: __('Layout', 'jankx'),
+                        },
+                        {
+                            name: 'style',
+                            title: __('Style', 'jankx'),
+                        },
+                        {
+                            name: 'effects',
+                            title: __('Effects', 'jankx'),
+                        },
+                    ]}
+                >
+                    {(tab) => {
+                        switch (tab.name) {
+                            case 'presets':
+                                return (
+                                    <>
+                                        <PresetPanel
+                                            presets={presets}
+                                            categories={categories}
+                                            currentValues={jankxControls}
+                                            onApplyPreset={(preset) =>
+                                                applyPreset(preset, preset.title)
+                                            }
+                                        />
+                                        <CustomPresetManager
+                                            currentControls={jankxControls}
+                                            onApplyPreset={(controls) =>
+                                                applyPreset({ controls }, __('Custom Preset', 'jankx'))
+                                            }
+                                            onPresetsChange={setCustomPresets}
+                                        />
+                                        <PanelBody
+                                            title={__('History', 'jankx')}
+                                            initialOpen={false}
+                                        >
+                                            <div className="jankx-history-controls">
+                                                <ToolbarGroup>
+                                                    <ToolbarButton
+                                                        icon={undo}
+                                                        label={__('Undo Preset', 'jankx')}
+                                                        onClick={undoPreset}
+                                                        disabled={historyIndexRef.current <= 0}
+                                                    />
+                                                    <ToolbarButton
+                                                        icon={redo}
+                                                        label={__('Redo Preset', 'jankx')}
+                                                        onClick={redoPreset}
+                                                        disabled={
+                                                            historyIndexRef.current >=
+                                                            historyRef.current.length - 1
+                                                        }
+                                                    />
+                                                </ToolbarGroup>
+                                                <p className="jankx-history-hint">
+                                                    {__('Undo/Redo preset applications', 'jankx')}
+                                                </p>
+                                            </div>
+                                        </PanelBody>
+                                    </>
+                                );
+
+                            case 'layout':
+                                return (
+                                    <PanelBody
+                                        title={__('Layout Settings', 'jankx')}
+                                        initialOpen={true}
+                                    >
+                                        {Object.entries(blockConfig).map(
+                                            ([name, config]) =>
+                                                config.category === 'layout' &&
+                                                renderControl(name, config)
+                                        )}
+                                        {Object.keys(blockConfig).filter(
+                                            key => blockConfig[key].category === 'layout'
+                                        ).length === 0 && (
+                                            <p className="jankx-no-controls">
+                                                {__('No layout controls available for this block.', 'jankx')}
+                                            </p>
+                                        )}
+                                    </PanelBody>
+                                );
+
+                            case 'style':
+                                return (
+                                    <PanelBody
+                                        title={__('Style Settings', 'jankx')}
+                                        initialOpen={true}
+                                    >
+                                        {Object.entries(blockConfig).map(
+                                            ([name, config]) =>
+                                                config.category === 'style' &&
+                                                renderControl(name, config)
+                                        )}
+                                        {Object.keys(blockConfig).filter(
+                                            key => blockConfig[key].category === 'style'
+                                        ).length === 0 && (
+                                            <p className="jankx-no-controls">
+                                                {__('No style controls available for this block.', 'jankx')}
+                                            </p>
+                                        )}
+                                    </PanelBody>
+                                );
+
+                            case 'effects':
+                                return (
+                                    <PanelBody
+                                        title={__('Effects & Animations', 'jankx')}
+                                        initialOpen={true}
+                                    >
+                                        {Object.entries(blockConfig).map(
+                                            ([name, config]) =>
+                                                config.category === 'effects' &&
+                                                renderControl(name, config)
+                                        )}
+                                        {Object.keys(blockConfig).filter(
+                                            key => blockConfig[key].category === 'effects'
+                                        ).length === 0 && (
+                                            <p className="jankx-no-controls">
+                                                {__('No effect controls available for this block.', 'jankx')}
+                                            </p>
+                                        )}
+                                    </PanelBody>
+                                );
+
+                            default:
+                                return null;
+                        }
+                    }}
+                </TabPanel>
+            </InspectorControls>
+        ), [blockConfig, presets, categories, jankxControls, applyPreset, setCustomPresets, undoPreset, redoPreset, renderControl]);
+
         return (
             <>
                 <BlockEdit {...props} />
-
-                {/* Block Toolbar - Template Library */}
-                {isSelected && useMemo(() => (
-                    <BlockControls group="other">
-                        <ToolbarGroup>
-                            <TemplateExportButton clientId={props.clientId} />
-                            <ToolbarButton
-                                icon={cloudUpload}
-                                label={__('Import Template', 'jankx')}
-                                onClick={() => setIsTemplateLibraryOpen(true)}
-                            />
-                        </ToolbarGroup>
-                    </BlockControls>
-                ), [isSelected])}
-
-                {/* Template Library Modal */}
+                {isSelected && blockControlsPanel}
                 {isTemplateLibraryOpen && (
                     <TemplateLibrary
                         clientId={props.clientId}
@@ -416,160 +561,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                         mode="import"
                     />
                 )}
-
-                {/* Inspector Controls */}
-                {isSelected && useMemo(() => (
-                    <InspectorControls group="styles">
-                        <TabPanel
-                            className="jankx-inspector-tabs"
-                            activeClass="is-active"
-                            tabs={[
-                                {
-                                    name: 'presets',
-                                    title: __('Presets', 'jankx'),
-                                },
-                                {
-                                    name: 'layout',
-                                    title: __('Layout', 'jankx'),
-                                },
-                                {
-                                    name: 'style',
-                                    title: __('Style', 'jankx'),
-                                },
-                                {
-                                    name: 'effects',
-                                    title: __('Effects', 'jankx'),
-                                },
-                            ]}
-                        >
-                            {(tab) => {
-                                switch (tab.name) {
-                                    case 'presets':
-                                        return (
-                                            <>
-                                                {/* Built-in Presets */}
-                                                <PresetPanel
-                                                    presets={presets}
-                                                    categories={categories}
-                                                    currentValues={jankxControls}
-                                                    onApplyPreset={(preset) =>
-                                                        applyPreset(preset, preset.title)
-                                                    }
-                                                />
-
-                                                {/* Custom User Presets */}
-                                                <CustomPresetManager
-                                                    currentControls={jankxControls}
-                                                    onApplyPreset={(controls) =>
-                                                        applyPreset({ controls }, __('Custom Preset', 'jankx'))
-                                                    }
-                                                    onPresetsChange={setCustomPresets}
-                                                />
-
-                                                {/* Preset Undo/Redo */}
-                                                <PanelBody
-                                                    title={__('History', 'jankx')}
-                                                    initialOpen={false}
-                                                >
-                                                    <div className="jankx-history-controls">
-                                                        <ToolbarGroup>
-                                                            <ToolbarButton
-                                                                icon={undo}
-                                                                label={__('Undo Preset', 'jankx')}
-                                                                onClick={undoPreset}
-                                                                disabled={historyIndexRef.current <= 0}
-                                                            />
-                                                            <ToolbarButton
-                                                                icon={redo}
-                                                                label={__('Redo Preset', 'jankx')}
-                                                                onClick={redoPreset}
-                                                                disabled={
-                                                                    historyIndexRef.current >=
-                                                                    historyRef.current.length - 1
-                                                                }
-                                                            />
-                                                        </ToolbarGroup>
-                                                        <p className="jankx-history-hint">
-                                                            {__('Undo/Redo preset applications', 'jankx')}
-                                                        </p>
-                                                    </div>
-                                                </PanelBody>
-                                            </>
-                                        );
-
-                                    case 'layout':
-                                        return (
-                                            <PanelBody
-                                                title={__('Layout Settings', 'jankx')}
-                                                initialOpen={true}
-                                            >
-                                                {Object.entries(blockConfig).map(
-                                                    ([name, config]) =>
-                                                        config.category === 'layout' &&
-                                                        renderControl(name, config)
-                                                )}
-
-                                                {Object.keys(blockConfig).filter(
-                                                    key => blockConfig[key].category === 'layout'
-                                                ).length === 0 && (
-                                                    <p className="jankx-no-controls">
-                                                        {__('No layout controls available for this block.', 'jankx')}
-                                                    </p>
-                                                )}
-                                            </PanelBody>
-                                        );
-
-                                    case 'style':
-                                        return (
-                                            <PanelBody
-                                                title={__('Style Settings', 'jankx')}
-                                                initialOpen={true}
-                                            >
-                                                {Object.entries(blockConfig).map(
-                                                    ([name, config]) =>
-                                                        config.category === 'style' &&
-                                                        renderControl(name, config)
-                                                )}
-
-                                                {Object.keys(blockConfig).filter(
-                                                    key => blockConfig[key].category === 'style'
-                                                ).length === 0 && (
-                                                    <p className="jankx-no-controls">
-                                                        {__('No style controls available for this block.', 'jankx')}
-                                                    </p>
-                                                )}
-                                            </PanelBody>
-                                        );
-
-                                    case 'effects':
-                                        return (
-                                            <PanelBody
-                                                title={__('Effects & Animations', 'jankx')}
-                                                initialOpen={true}
-                                            >
-                                                {Object.entries(blockConfig).map(
-                                                    ([name, config]) =>
-                                                        config.category === 'effects' &&
-                                                        renderControl(name, config)
-                                                )}
-
-                                                {Object.keys(blockConfig).filter(
-                                                    key => blockConfig[key].category === 'effects'
-                                                ).length === 0 && (
-                                                    <p className="jankx-no-controls">
-                                                        {__('No effect controls available for this block.', 'jankx')}
-                                                    </p>
-                                                )}
-                                            </PanelBody>
-                                        );
-
-                                    default:
-                                        return null;
-                                }
-                            }}
-                        </TabPanel>
-                    </InspectorControls>
-                ), [isSelected])}
+                {isSelected && inspectorPanel}
             </>
         );
     };
