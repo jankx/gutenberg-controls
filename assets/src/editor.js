@@ -13,7 +13,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useCallback, useRef, useMemo } from '@wordpress/element';
+import { useState, useCallback, useRef, useMemo, useEffect } from '@wordpress/element';
 import { undo, redo, cloudUpload, desktop, tablet, mobile, file } from '@wordpress/icons';
 
 // Import custom controls
@@ -71,84 +71,60 @@ const ResponsiveFontSizeContent = ({ device, onDeviceChange, value, onChange }) 
 );
 
 /**
- * Cache wrapped components to prevent duplicate renders in StrictMode
+ * Stable empty object default to avoid new reference every render
  */
-const wrappedComponentCache = new WeakMap();
+const EMPTY_OBJECT = {};
 
 /**
- * Add Jankx controls inspector panel to supported blocks
+ * Responsive Font Size controls for non-Jankx blocks
  */
+const NonJankxResponsiveFontSize = ({ props }) => {
+    const { attributes, setAttributes, isSelected } = props;
+    const responsiveFs = attributes.jankxResponsiveFontSize || EMPTY_OBJECT;
+    const [fsDevice, setFsDevice] = useState('desktop');
+
+    const updateResponsiveFontSize = (device, value) => {
+        setAttributes({
+            jankxResponsiveFontSize: {
+                ...responsiveFs,
+                [device]: value || undefined,
+            },
+        });
+    };
+
+    if (!isSelected) return null;
+
+    return (
+        <InspectorControls>
+            <PanelBody
+                title={__('Responsive Font Size', 'jankx')}
+                initialOpen={false}
+            >
+                <ResponsiveFontSizeContent
+                    device={fsDevice}
+                    onDeviceChange={setFsDevice}
+                    value={responsiveFs[fsDevice] || attributes.fontSize || undefined}
+                    onChange={(val) => updateResponsiveFontSize(fsDevice, val)}
+                />
+            </PanelBody>
+        </InspectorControls>
+    );
+}
+
 const withJankxControls = createHigherOrderComponent((BlockEdit) => {
-    // Return cached wrapper if exists (avoids StrictMode double-mounting)
-    if (wrappedComponentCache.has(BlockEdit)) {
-        return wrappedComponentCache.get(BlockEdit);
-    }
-
-    const WrappedBlockEdit = (props) => {
-        const { name, attributes, setAttributes, isSelected } = props;
-
-        // Debug: track render count
-        const renderCount = React.useRef(0);
-        renderCount.current++;
-        if (window.jankxDebug === undefined) window.jankxDebug = {};
-        if (window.jankxDebug[name] === undefined) window.jankxDebug[name] = 0;
-        window.jankxDebug[name]++;
-        // eslint-disable-next-line no-console
-        console.log(`[JankxControls] ${name} render #${window.jankxDebug[name]} (instance: ${renderCount.current})`);
-
-        const blockType = wp.blocks?.getBlockType?.(name);
-        const supportsFontSize = blockType?.supports?.typography?.fontSize;
-        const isJankxBlock = name.startsWith('jankx/');
-
-        // For non-Jankx blocks, only add responsive font-size if supported
-        if (!isJankxBlock) {
-            if (!supportsFontSize) {
-                return <BlockEdit {...props} />;
-            }
-
-            const responsiveFs = attributes.jankxResponsiveFontSize || {};
-            const [fsDevice, setFsDevice] = useState('desktop');
-
-            const updateResponsiveFontSize = (device, value) => {
-                setAttributes({
-                    jankxResponsiveFontSize: {
-                        ...responsiveFs,
-                        [device]: value || undefined,
-                    },
-                });
-            };
-
-            const responsiveFontSizePanel = useMemo(() => (
-                <InspectorControls>
-                    <PanelBody
-                        title={__('Responsive Font Size', 'jankx')}
-                        initialOpen={false}
-                    >
-                        <ResponsiveFontSizeContent
-                            device={fsDevice}
-                            onDeviceChange={setFsDevice}
-                            value={responsiveFs[fsDevice] || attributes.fontSize || undefined}
-                            onChange={(val) => updateResponsiveFontSize(fsDevice, val)}
-                        />
-                    </PanelBody>
-                </InspectorControls>
-            ), [fsDevice, responsiveFs, attributes.fontSize]);
-
-            return (
-                <>
-                    <BlockEdit {...props} />
-                    {isSelected && responsiveFontSizePanel}
-                </>
-            );
-        }
+    return (props) => {
+        const { attributes, setAttributes, isSelected, name } = props;
 
         // Get block configuration
-        const blockConfig = window.jankxBlocks?.controls?.[name] || {};
+        const blockConfig = window.jankxBlocks?.controls?.[name] || EMPTY_OBJECT;
         const presets = window.jankxBlocks?.presets || [];
         const categories = window.jankxBlocks?.categories || [];
 
-        // Get current jankx controls values
-        const jankxControls = attributes.jankxControls || {};
+        // Get current jankx controls values - use stable reference
+        const jankxControls = useMemo(
+            () => attributes.jankxControls || EMPTY_OBJECT,
+            [attributes.jankxControls]
+        );
 
         /**
          * Enable live preview for real-time updates
@@ -171,15 +147,11 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
          * Save current state to history
          */
         const saveToHistory = useCallback((controls) => {
-            // Remove any future history if we're not at the end
             if (historyIndexRef.current < historyRef.current.length - 1) {
                 historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
             }
-
             historyRef.current.push(JSON.stringify(controls));
             historyIndexRef.current++;
-
-            // Limit history to 50 states
             if (historyRef.current.length > 50) {
                 historyRef.current.shift();
                 historyIndexRef.current--;
@@ -190,17 +162,9 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
          * Update a specific control value with live preview
          */
         const updateControl = useCallback((controlName, value) => {
-            const newControls = {
-                ...jankxControls,
-                [controlName]: value,
-            };
-
-            // Save to history before updating
+            const newControls = { ...jankxControls, [controlName]: value };
             saveToHistory(jankxControls);
-
-            setAttributes({
-                jankxControls: newControls,
-            });
+            setAttributes({ jankxControls: newControls });
         }, [jankxControls, setAttributes, saveToHistory]);
 
         /**
@@ -210,16 +174,8 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
             if (historyIndexRef.current > 0) {
                 historyIndexRef.current--;
                 const previousState = JSON.parse(historyRef.current[historyIndexRef.current]);
-
-                setAttributes({
-                    jankxControls: previousState,
-                });
-
-                createSuccessNotice(__('Reverted to previous state', 'jankx'), {
-                    type: 'snackbar',
-                });
-
-                // Also trigger WordPress undo
+                setAttributes({ jankxControls: previousState });
+                createSuccessNotice(__('Reverted to previous state', 'jankx'), { type: 'snackbar' });
                 undoAction();
             }
         }, [setAttributes, undoAction, createSuccessNotice]);
@@ -231,16 +187,8 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
             if (historyIndexRef.current < historyRef.current.length - 1) {
                 historyIndexRef.current++;
                 const nextState = JSON.parse(historyRef.current[historyIndexRef.current]);
-
-                setAttributes({
-                    jankxControls: nextState,
-                });
-
-                createSuccessNotice(__('Restored next state', 'jankx'), {
-                    type: 'snackbar',
-                });
-
-                // Also trigger WordPress redo
+                setAttributes({ jankxControls: nextState });
+                createSuccessNotice(__('Restored next state', 'jankx'), { type: 'snackbar' });
                 redoAction();
             }
         }, [setAttributes, redoAction, createSuccessNotice]);
@@ -249,28 +197,14 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
          * Apply a preset with undo support
          */
         const applyPreset = useCallback((preset, presetName = 'Preset') => {
-            // Save current state before applying
             saveToHistory(jankxControls);
-
-            const newControls = {
-                ...jankxControls,
-                ...(preset.controls || preset),
-            };
-
-            setAttributes({
-                jankxControls: newControls,
-            });
-
+            const newControls = { ...jankxControls, ...(preset.controls || preset) };
+            setAttributes({ jankxControls: newControls });
             createSuccessNotice(
                 sprintf(__('Applied %s', 'jankx'), presetName),
                 {
                     type: 'snackbar',
-                    actions: [
-                        {
-                            label: __('Undo', 'jankx'),
-                            onClick: undoPreset,
-                        },
-                    ],
+                    actions: [{ label: __('Undo', 'jankx'), onClick: undoPreset }],
                 }
             );
         }, [jankxControls, setAttributes, saveToHistory, undoPreset, createSuccessNotice]);
@@ -278,7 +212,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
         /**
          * Render control based on type, optionally wrapped with ResponsiveWrapper
          */
-        const renderControl = (controlName, controlConfig) => {
+        const renderControl = useCallback((controlName, controlConfig) => {
             const value = jankxControls[controlName] || {};
 
             const renderContent = (overrideValue, overrideOnChange) => {
@@ -297,7 +231,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 allowResponsive={controlConfig.responsive !== false}
                             />
                         );
-
                     case 'jankx/icon':
                     case 'jankx/icon-picker':
                         return (
@@ -310,7 +243,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 allowSize={true}
                             />
                         );
-
                     case 'jankx/responsive':
                         return (
                             <ResponsiveControl
@@ -320,7 +252,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 onChange={handleChange}
                             />
                         );
-
                     case 'jankx/color':
                         return (
                             <ColorControl
@@ -335,7 +266,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 allowTheme={controlConfig.allowTheme !== false}
                             />
                         );
-
                     case 'jankx/typography':
                         return (
                             <TypographyControl
@@ -347,7 +277,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 allowResponsive={controlConfig.allowResponsive !== false}
                             />
                         );
-
                     case 'jankx/border':
                     case 'jankx/shadow':
                         return (
@@ -356,7 +285,6 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 <span className="jankx-control-hint">{__('Configure in Style tab', 'jankx')}</span>
                             </div>
                         );
-
                     case 'jankx/row':
                     case 'jankx/image':
                         return (
@@ -365,13 +293,11 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 <span className="jankx-control-hint">{__('Configure in block toolbar', 'jankx')}</span>
                             </div>
                         );
-
                     default:
                         return null;
                 }
             };
 
-            // Wrap with responsive device tabs when enabled
             if (controlConfig.responsive) {
                 return (
                     <ResponsiveWrapper
@@ -389,170 +315,29 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
             }
 
             return renderContent();
-        };
+        }, [jankxControls, updateControl]);
 
-        const blockControlsPanel = useMemo(() => (
-            <BlockControls group="other">
-                <ToolbarGroup>
-                    <TemplateExportButton clientId={props.clientId} />
-                    <ToolbarButton
-                        icon={cloudUpload}
-                        label={__('Import Template', 'jankx')}
-                        onClick={() => setIsTemplateLibraryOpen(true)}
-                    />
-                </ToolbarGroup>
-            </BlockControls>
-        ), [props.clientId]);
-
-        const inspectorPanel = useMemo(() => (
-            <InspectorControls group="styles">
-                <TabPanel
-                    className="jankx-inspector-tabs"
-                    activeClass="is-active"
-                    tabs={[
-                        {
-                            name: 'presets',
-                            title: __('Presets', 'jankx'),
-                        },
-                        {
-                            name: 'layout',
-                            title: __('Layout', 'jankx'),
-                        },
-                        {
-                            name: 'style',
-                            title: __('Style', 'jankx'),
-                        },
-                        {
-                            name: 'effects',
-                            title: __('Effects', 'jankx'),
-                        },
-                    ]}
-                >
-                    {(tab) => {
-                        switch (tab.name) {
-                            case 'presets':
-                                return (
-                                    <>
-                                        <PresetPanel
-                                            presets={presets}
-                                            categories={categories}
-                                            currentValues={jankxControls}
-                                            onApplyPreset={(preset) =>
-                                                applyPreset(preset, preset.title)
-                                            }
-                                        />
-                                        <CustomPresetManager
-                                            currentControls={jankxControls}
-                                            onApplyPreset={(controls) =>
-                                                applyPreset({ controls }, __('Custom Preset', 'jankx'))
-                                            }
-                                            onPresetsChange={setCustomPresets}
-                                        />
-                                        <PanelBody
-                                            title={__('History', 'jankx')}
-                                            initialOpen={false}
-                                        >
-                                            <div className="jankx-history-controls">
-                                                <ToolbarGroup>
-                                                    <ToolbarButton
-                                                        icon={undo}
-                                                        label={__('Undo Preset', 'jankx')}
-                                                        onClick={undoPreset}
-                                                        disabled={historyIndexRef.current <= 0}
-                                                    />
-                                                    <ToolbarButton
-                                                        icon={redo}
-                                                        label={__('Redo Preset', 'jankx')}
-                                                        onClick={redoPreset}
-                                                        disabled={
-                                                            historyIndexRef.current >=
-                                                            historyRef.current.length - 1
-                                                        }
-                                                    />
-                                                </ToolbarGroup>
-                                                <p className="jankx-history-hint">
-                                                    {__('Undo/Redo preset applications', 'jankx')}
-                                                </p>
-                                            </div>
-                                        </PanelBody>
-                                    </>
-                                );
-
-                            case 'layout':
-                                return (
-                                    <PanelBody
-                                        title={__('Layout Settings', 'jankx')}
-                                        initialOpen={true}
-                                    >
-                                        {Object.entries(blockConfig).map(
-                                            ([name, config]) =>
-                                                config.category === 'layout' &&
-                                                renderControl(name, config)
-                                        )}
-                                        {Object.keys(blockConfig).filter(
-                                            key => blockConfig[key].category === 'layout'
-                                        ).length === 0 && (
-                                            <p className="jankx-no-controls">
-                                                {__('No layout controls available for this block.', 'jankx')}
-                                            </p>
-                                        )}
-                                    </PanelBody>
-                                );
-
-                            case 'style':
-                                return (
-                                    <PanelBody
-                                        title={__('Style Settings', 'jankx')}
-                                        initialOpen={true}
-                                    >
-                                        {Object.entries(blockConfig).map(
-                                            ([name, config]) =>
-                                                config.category === 'style' &&
-                                                renderControl(name, config)
-                                        )}
-                                        {Object.keys(blockConfig).filter(
-                                            key => blockConfig[key].category === 'style'
-                                        ).length === 0 && (
-                                            <p className="jankx-no-controls">
-                                                {__('No style controls available for this block.', 'jankx')}
-                                            </p>
-                                        )}
-                                    </PanelBody>
-                                );
-
-                            case 'effects':
-                                return (
-                                    <PanelBody
-                                        title={__('Effects & Animations', 'jankx')}
-                                        initialOpen={true}
-                                    >
-                                        {Object.entries(blockConfig).map(
-                                            ([name, config]) =>
-                                                config.category === 'effects' &&
-                                                renderControl(name, config)
-                                        )}
-                                        {Object.keys(blockConfig).filter(
-                                            key => blockConfig[key].category === 'effects'
-                                        ).length === 0 && (
-                                            <p className="jankx-no-controls">
-                                                {__('No effect controls available for this block.', 'jankx')}
-                                            </p>
-                                        )}
-                                    </PanelBody>
-                                );
-
-                            default:
-                                return null;
-                        }
-                    }}
-                </TabPanel>
-            </InspectorControls>
-        ), [blockConfig, presets, categories, jankxControls, applyPreset, setCustomPresets, undoPreset, redoPreset, renderControl]);
+        // If this is a non-Jankx block, just return the responsive font size controls
+        if (Object.keys(blockConfig).length === 0) {
+            return (
+                <>
+                    <BlockEdit {...props} />
+                    <NonJankxResponsiveFontSize props={props} />
+                </>
+            );
+        }
 
         return (
             <>
                 <BlockEdit {...props} />
-                {isSelected && blockControlsPanel}
+
+                {isSelected && (
+                    <JankxBlockToolbar
+                        clientId={props.clientId}
+                        onOpenTemplateLibrary={() => setIsTemplateLibraryOpen(true)}
+                    />
+                )}
+
                 {isTemplateLibraryOpen && (
                     <TemplateLibrary
                         clientId={props.clientId}
@@ -561,13 +346,25 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                         mode="import"
                     />
                 )}
-                {isSelected && inspectorPanel}
+
+                {isSelected && (
+                    <JankxInspectorControls
+                        blockConfig={blockConfig}
+                        presets={presets}
+                        categories={categories}
+                        jankxControls={jankxControls}
+                        applyPreset={applyPreset}
+                        undoPreset={undoPreset}
+                        redoPreset={redoPreset}
+                        renderControl={renderControl}
+                        historyIndexRef={historyIndexRef}
+                        historyRef={historyRef}
+                        setCustomPresets={setCustomPresets}
+                    />
+                )}
             </>
         );
     };
-
-    wrappedComponentCache.set(BlockEdit, WrappedBlockEdit);
-    return WrappedBlockEdit;
 }, 'withJankxControls');
 
 /**
