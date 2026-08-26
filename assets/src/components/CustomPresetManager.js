@@ -7,8 +7,6 @@
 
 import { useState, useCallback, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
-import { store as noticesStore } from '@wordpress/notices';
 import {
     Button,
     TextControl,
@@ -100,7 +98,7 @@ export const CustomPresetManager = ({
     const [isGlobal, setIsGlobal] = useState(false);
     const [editingPreset, setEditingPreset] = useState(null);
 
-    const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+    const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
     // Sync with parent
     useEffect(() => {

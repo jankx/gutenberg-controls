@@ -10,8 +10,6 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls, BlockControls, FontSizePicker } from '@wordpress/block-editor';
 import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton, Tooltip, BaseControl, Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
-import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useCallback, useRef, useMemo, useEffect } from '@wordpress/element';
 import { undo, redo, cloudUpload, desktop, tablet, mobile, file } from '@wordpress/icons';
@@ -225,9 +223,21 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
         const [customPresets, setCustomPresets] = useState([]);
         const [isTemplateLibraryOpen, setIsTemplateLibraryOpen] = useState(false);
 
-        // WordPress undo/redo dispatch
-        const { undo: undoAction, redo: redoAction } = useDispatch(editorStore);
-        const { createSuccessNotice } = useDispatch(noticesStore);
+        // WordPress undo/redo dispatch — use core store (available in both post editor and site editor)
+        const coreStore = 'core';
+        let undoAction, redoAction, createSuccessNotice;
+        try {
+            ({ undo: undoAction, redo: redoAction } = useDispatch(coreStore));
+        } catch (e) {
+            undoAction = () => {};
+            redoAction = () => {};
+        }
+        try {
+            const noticesDispatch = useDispatch('core/notices');
+            createSuccessNotice = noticesDispatch.createSuccessNotice;
+        } catch (e) {
+            createSuccessNotice = () => {};
+        }
 
         // History tracking for presets
         const historyRef = useRef([]);
@@ -268,7 +278,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                 createSuccessNotice(__('Reverted to previous state', 'jankx'), { type: 'snackbar' });
                 undoAction();
             }
-        }, [setAttributes, undoAction, createSuccessNotice]);
+        }, [setAttributes]);
 
         /**
          * Redo preset application
@@ -281,7 +291,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                 createSuccessNotice(__('Restored next state', 'jankx'), { type: 'snackbar' });
                 redoAction();
             }
-        }, [setAttributes, redoAction, createSuccessNotice]);
+        }, [setAttributes]);
 
         /**
          * Apply a preset with undo support

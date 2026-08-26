@@ -8,7 +8,6 @@
 import { useState, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { store as noticesStore } from '@wordpress/notices';
 import {
     Button,
     Modal,
@@ -114,7 +113,7 @@ export const TemplateLibrary = ({
 
     const { getBlock } = useSelect(blockEditorStore);
     const { insertBlocks, replaceBlock } = useDispatch(blockEditorStore);
-    const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+    const { createSuccessNotice, createErrorNotice } = useDispatch('core/notices');
 
     /**
      * Export current block
