@@ -21,7 +21,6 @@ import {
     CardHeader,
     CardBody,
     CardFooter,
-    ButtonGroup,
     __experimentalHStack as HStack,
     __experimentalVStack as VStack,
 } from '@wordpress/components';
@@ -275,7 +274,7 @@ export const TemplateLibrary = ({
             className="jankx-template-library"
             size="large"
         >
-            <ButtonGroup className="jankx-template-tabs">
+            <div style={{display:'flex',gap:'2px'}} className="jankx-template-tabs">
                 <Button
                     variant={activeTab === 'export' ? 'primary' : 'secondary'}
                     onClick={() => {
@@ -296,7 +295,7 @@ export const TemplateLibrary = ({
                 >
                     {__('Import', 'jankx')}
                 </Button>
-            </ButtonGroup>
+            </div>
 
             {activeTab === 'export' && (
                 <VStack spacing={4} className="jankx-template-export">
@@ -433,7 +432,7 @@ export const TemplateLibrary = ({
                             </VStack>
                         </CardBody>
                         <CardFooter>
-                            <ButtonGroup>
+                            <div style={{display:'flex',gap:'2px'}}>
                                 <Button
                                     variant="secondary"
                                     onClick={() => setPreviewTemplate(null)}
@@ -448,7 +447,7 @@ export const TemplateLibrary = ({
                                 >
                                     {__('Import Template', 'jankx')}
                                 </Button>
-                            </ButtonGroup>
+                            </div>
                         </CardFooter>
                     </Card>
 

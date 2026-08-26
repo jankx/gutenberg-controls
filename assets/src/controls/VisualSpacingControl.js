@@ -9,7 +9,6 @@ import { useState, useCallback, useRef } from '@wordpress/element';
 import {
     BaseControl,
     Button,
-    ButtonGroup,
     __experimentalUnitControl as UnitControl,
     Tooltip,
 } from '@wordpress/components';
@@ -23,8 +22,11 @@ const VisualSpacingControl = ({
     values = { top: '', right: '', bottom: '', left: '' },
     onChange,
     allowResponsive = true,
+    isLinked: externalIsLinked,
+    setIsLinked: externalSetIsLinked,
 }) => {
-    const [isLinked, setIsLinked] = useState(true);
+    const [sideLinked, setSideLinked] = useState(true);
+    const [isResponsiveLinked, setIsResponsiveLinked] = useState(true);
     const [activeDevice, setActiveDevice] = useState('desktop');
     const [dragging, setDragging] = useState(null);
     const [hoveredSide, setHoveredSide] = useState(null);
@@ -51,7 +53,7 @@ const VisualSpacingControl = ({
     const updateValue = (side, value) => {
         const newValues = { ...currentValues };
 
-        if (isLinked) {
+        if (sideLinked) {
             // Update all sides
             newValues.top = value;
             newValues.right = value;
@@ -62,6 +64,14 @@ const VisualSpacingControl = ({
         }
 
         if (allowResponsive) {
+            if (isResponsiveLinked) {
+                const linkedDevices = Object.keys(values).reduce((result, device) => ({
+                    ...result,
+                    [device]: newValues,
+                }), {});
+                onChange(linkedDevices);
+                return;
+            }
             onChange({
                 ...values,
                 [activeDevice]: newValues,
@@ -92,7 +102,7 @@ const VisualSpacingControl = ({
         const newValue = Math.max(0, Math.round(startValueRef.current + delta));
 
         updateValue(dragging, formatValue(newValue));
-    }, [dragging, currentValues, isLinked]);
+    }, [dragging, currentValues, sideLinked, isResponsiveLinked]);
 
     const handleDragEnd = useCallback(() => {
         setDragging(null);
@@ -203,7 +213,7 @@ const VisualSpacingControl = ({
         <BaseControl label={label} className="jankx-visual-spacing">
             {/* Device selector */}
             {allowResponsive && (
-                <ButtonGroup className="jankx-device-selector">
+                <div style={{display:'flex',gap:'2px'}} className="jankx-device-selector">
                     <Button
                         icon={desktop}
                         variant={activeDevice === 'ultrawide' ? 'primary' : 'secondary'}
@@ -228,7 +238,7 @@ const VisualSpacingControl = ({
                         onClick={() => setActiveDevice('mobile')}
                         size="small"
                     />
-                </ButtonGroup>
+                </div>
             )}
 
             {/* Visual drag box */}
@@ -302,12 +312,29 @@ const VisualSpacingControl = ({
             {/* Link toggle and inputs */}
             <div className="jankx-spacing-controls">
                 <Button
-                    icon={isLinked ? link : linkOff}
-                    onClick={() => setIsLinked(!isLinked)}
-                    variant={isLinked ? 'primary' : 'secondary'}
+                    icon={sideLinked ? link : linkOff}
+                    onClick={() => setSideLinked(!sideLinked)}
+                    variant={sideLinked ? 'primary' : 'secondary'}
                     size="small"
                     className="jankx-link-toggle"
+                    label={sideLinked ? __('Unlink sides', 'jankx') : __('Link sides', 'jankx')}
                 />
+                {allowResponsive && (
+                    <Button
+                        icon={isResponsiveLinked ? link : linkOff}
+                        onClick={() => {
+                            const newValue = !isResponsiveLinked;
+                            setIsResponsiveLinked(newValue);
+                            if (externalSetIsLinked) {
+                                externalSetIsLinked(newValue);
+                            }
+                        }}
+                        variant={isResponsiveLinked ? 'primary' : 'secondary'}
+                        size="small"
+                        className="jankx-responsive-link-toggle"
+                        label={isResponsiveLinked ? __('Unlink device values', 'jankx') : __('Link device values', 'jankx')}
+                    />
+                )}
 
                 <div className="jankx-spacing-inputs">
                     {['top', 'right', 'bottom', 'left'].map((side) => (
@@ -326,7 +353,7 @@ const VisualSpacingControl = ({
             {/* Quick presets */}
             <div className="jankx-spacing-presets">
                 <label>{__('Quick Presets', 'jankx')}</label>
-                <ButtonGroup className="jankx-preset-buttons">
+                <div style={{display:'flex',gap:'2px'}} className="jankx-preset-buttons">
                     {PRESET_VALUES.map((val) => (
                         <Button
                             key={val}
@@ -337,7 +364,7 @@ const VisualSpacingControl = ({
                             {val}
                         </Button>
                     ))}
-                </ButtonGroup>
+                </div>
             </div>
         </BaseControl>
     );

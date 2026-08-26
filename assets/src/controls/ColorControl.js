@@ -14,7 +14,6 @@ import { __ } from '@wordpress/i18n';
 import {
     BaseControl,
     Button,
-    ButtonGroup,
     ColorPicker,
     RangeControl,
     __experimentalHStack as HStack,
@@ -209,7 +208,7 @@ export const ColorControl = ({
 
             {/* Type Tabs */}
             {(allowSolid || allowGradient || allowDuotone) && (
-                <ButtonGroup className="jankx-color-tabs">
+                <div style={{display:'flex',gap:'2px'}} className="jankx-color-tabs">
                     {allowSolid && (
                         <Button
                             variant={colorType === COLOR_TYPE_SOLID ? 'primary' : 'secondary'}
@@ -240,7 +239,7 @@ export const ColorControl = ({
                             {__('Duotone', 'jankx')}
                         </Button>
                     )}
-                </ButtonGroup>
+                </div>
             )}
 
             {/* Solid Color Panel */}
@@ -322,7 +321,7 @@ export const ColorControl = ({
             {colorType === COLOR_TYPE_GRADIENT && (
                 <VStack spacing={3} className="jankx-color-panel">
                     {/* Gradient Type */}
-                    <ButtonGroup className="jankx-gradient-type">
+                    <div style={{display:'flex',gap:'2px'}} className="jankx-gradient-type">
                         <Button
                             variant={gradientType === 'linear' ? 'primary' : 'secondary'}
                             onClick={() => handleGradientTypeChange('linear')}
@@ -337,7 +336,7 @@ export const ColorControl = ({
                         >
                             {__('Radial', 'jankx')}
                         </Button>
-                    </ButtonGroup>
+                    </div>
 
                     {/* Angle (linear only) */}
                     {gradientType === 'linear' && (

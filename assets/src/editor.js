@@ -8,7 +8,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls, BlockControls, FontSizePicker } from '@wordpress/block-editor';
-import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton, Tooltip, BaseControl, Button, ButtonGroup } from '@wordpress/components';
+import { PanelBody, TabPanel, ToolbarGroup, ToolbarButton, Tooltip, BaseControl, Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
@@ -45,7 +45,7 @@ const FONT_SIZE_DEVICES = [
 
 const ResponsiveFontSizeContent = ({ device, onDeviceChange, value, onChange }) => (
     <div className="jankx-responsive-font-size">
-        <ButtonGroup style={{ marginBottom: 12, display: 'flex', gap: 2 }}>
+        <div style={{ marginBottom: 12, display: 'flex', gap: 2 }}>
             {FONT_SIZE_DEVICES.map((d) => (
                 <Tooltip key={d.name} text={d.label}>
                     <Button
@@ -56,7 +56,7 @@ const ResponsiveFontSizeContent = ({ device, onDeviceChange, value, onChange }) 
                     />
                 </Tooltip>
             ))}
-        </ButtonGroup>
+        </div>
         <BaseControl
             label={sprintf(__('Font Size (%s)', 'jankx'), FONT_SIZE_DEVICES.find(d => d.name === device)?.label || device)}
         >
@@ -305,7 +305,7 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
         const renderControl = useCallback((controlName, controlConfig) => {
             const value = jankxControls[controlName] || {};
 
-            const renderContent = (overrideValue, overrideOnChange) => {
+            const renderContent = (overrideValue, overrideOnChange, wrapperIsLinked, wrapperSetIsLinked) => {
                 const currentValue = overrideValue !== undefined ? overrideValue : value;
                 const handleChange = overrideOnChange || ((newValue) => updateControl(controlName, newValue));
 
@@ -340,6 +340,8 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 label={controlConfig.label}
                                 value={currentValue}
                                 onChange={handleChange}
+                                isLinked={wrapperIsLinked}
+                                setIsLinked={wrapperSetIsLinked}
                             />
                         );
                     case 'jankx/color':
@@ -365,6 +367,8 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                                 onChange={handleChange}
                                 allowFluid={controlConfig.allowFluid !== false}
                                 allowResponsive={controlConfig.allowResponsive !== false}
+                                isLinked={wrapperIsLinked}
+                                setIsLinked={wrapperSetIsLinked}
                             />
                         );
                     case 'jankx/border':
@@ -397,14 +401,14 @@ const withJankxControls = createHigherOrderComponent((BlockEdit) => {
                         onChange={(newValue) => updateControl(controlName, newValue)}
                         responsive={true}
                     >
-                        {({ value: deviceValue, onChange: deviceOnChange }) =>
-                            renderContent(deviceValue, deviceOnChange)
+                        {({ value: deviceValue, onChange: deviceOnChange, isLinked: wrapperIsLinked, setIsLinked: wrapperSetIsLinked }) =>
+                            renderContent(deviceValue, deviceOnChange, wrapperIsLinked, wrapperSetIsLinked)
                         }
                     </ResponsiveWrapper>
                 );
             }
 
-            return renderContent();
+            return renderContent(undefined, undefined, undefined, undefined);
         }, [jankxControls, updateControl]);
 
         // If this is a non-Jankx block, just return the responsive font size controls

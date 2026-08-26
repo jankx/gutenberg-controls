@@ -10,7 +10,6 @@ import {
     PanelBody,
     Button,
     SearchControl,
-    ButtonGroup,
     Modal,
     __experimentalGrid as Grid,
     Card,
@@ -110,7 +109,7 @@ const PresetPanel = ({ presets, categories, currentValues, onApplyPreset }) => {
                 {/* Quick presets */}
                 <div className="jankx-quick-presets">
                     <label>{__('Quick Apply', 'jankx')}</label>
-                    <ButtonGroup className="jankx-quick-buttons">
+                    <div style={{display:'flex',gap:'2px'}} className="jankx-quick-buttons">
                         {quickPresets.map(preset => (
                             <Tooltip key={preset.id} text={preset.title}>
                                 <Button
@@ -122,7 +121,7 @@ const PresetPanel = ({ presets, categories, currentValues, onApplyPreset }) => {
                                 </Button>
                             </Tooltip>
                         ))}
-                    </ButtonGroup>
+                    </div>
                 </div>
 
                 {/* Browse all */}
@@ -157,7 +156,7 @@ const PresetPanel = ({ presets, categories, currentValues, onApplyPreset }) => {
                             placeholder={__('Search presets...', 'jankx')}
                         />
 
-                        <ButtonGroup className="jankx-category-filter">
+                        <div style={{display:'flex',gap:'2px'}} className="jankx-category-filter">
                             <Button
                                 variant={activeCategory === 'all' ? 'primary' : 'secondary'}
                                 onClick={() => setActiveCategory('all')}
@@ -173,7 +172,7 @@ const PresetPanel = ({ presets, categories, currentValues, onApplyPreset }) => {
                                     {cat.title}
                                 </Button>
                             ))}
-                        </ButtonGroup>
+                        </div>
                     </div>
 
                     {/* Presets grid */}

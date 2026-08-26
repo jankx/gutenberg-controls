@@ -12,10 +12,10 @@
 
 import { useState, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { link, linkOff } from '@wordpress/icons';
 import {
     BaseControl,
     Button,
-    ButtonGroup,
     ToggleControl,
     RangeControl,
     SelectControl,
@@ -112,8 +112,15 @@ export const TypographyControl = ({
     onChange,
     allowFluid = true,
     allowResponsive = true,
+    isLinked: externalIsLinked,
+    setIsLinked: externalSetIsLinked,
 }) => {
     const [activeTab, setActiveTab] = useState('font');
+    const [internalIsLinked, setInternalIsLinked] = useState(true);
+
+    // Use external link state from ResponsiveWrapper when available
+    const isLinked = externalIsLinked !== undefined ? externalIsLinked : internalIsLinked;
+    const setIsLinked = externalSetIsLinked || setInternalIsLinked;
 
     const fontFamily = value.fontFamily || '';
     const useThemeFont = value.useThemeFont ?? true;
@@ -137,12 +144,36 @@ export const TypographyControl = ({
 
     const updateValue = useCallback(
         (newValues) => {
+            if (isLinked) {
+                const responsiveKeys = [
+                    'textAlign',
+                    'textAlignUltrawide',
+                    'textAlignTablet',
+                    'textAlignMobile',
+                    'fontSizeUltrawide',
+                    'fontSizeTablet',
+                    'fontSizeMobile',
+                ];
+                const changedKey = Object.keys(newValues).find((key) => responsiveKeys.includes(key));
+                if (changedKey) {
+                    const valueToLink = newValues[changedKey];
+                    const linkedKeys = changedKey.startsWith('textAlign')
+                        ? ['textAlign', 'textAlignUltrawide', 'textAlignTablet', 'textAlignMobile']
+                        : ['fontSizeUltrawide', 'fontSizeTablet', 'fontSizeMobile'];
+                    onChange({
+                        ...value,
+                        ...newValues,
+                        ...linkedKeys.reduce((result, key) => ({ ...result, [key]: valueToLink }), {}),
+                    });
+                    return;
+                }
+            }
             onChange({
                 ...value,
                 ...newValues,
             });
         },
-        [value, onChange]
+        [value, onChange, isLinked]
     );
 
     // Generate preview style
@@ -245,7 +276,7 @@ export const TypographyControl = ({
                                 />
 
                                 {/* Font Style */}
-                                <ButtonGroup className="jankx-typo-style-toggle">
+                                <div style={{display:'flex',gap:'2px'}} className="jankx-typo-style-toggle">
                                     <Button
                                         variant={fontStyle === 'normal' ? 'primary' : 'secondary'}
                                         onClick={() => updateValue({ fontStyle: 'normal' })}
@@ -260,7 +291,7 @@ export const TypographyControl = ({
                                     >
                                         {__('Italic', 'jankx')}
                                     </Button>
-                                </ButtonGroup>
+                                </div>
                             </VStack>
                         )}
 
@@ -436,6 +467,13 @@ export const TypographyControl = ({
                             <VStack spacing={3} className="jankx-typo-panel">
                                 <div className="jankx-typo-section-title">
                                     {__('Text Align', 'jankx')}
+                                    <Button
+                                        icon={isLinked ? link : linkOff}
+                                        isPressed={isLinked}
+                                        onClick={() => setIsLinked((current) => !current)}
+                                        label={isLinked ? __('Unlink responsive values', 'jankx') : __('Link responsive values', 'jankx')}
+                                        size="small"
+                                    />
                                 </div>
 
                                 {/* Desktop */}
@@ -443,7 +481,7 @@ export const TypographyControl = ({
                                     <span className="jankx-typo-device-label">
                                         {__('Desktop', 'jankx')}
                                     </span>
-                                    <ButtonGroup>
+                                    <div style={{display:'flex',gap:'2px'}}>
                                         {['left', 'center', 'right', 'justify'].map((align) => (
                                             <Button
                                                 key={align}
@@ -458,7 +496,7 @@ export const TypographyControl = ({
                                                 label={align}
                                             />
                                         ))}
-                                    </ButtonGroup>
+                                    </div>
                                 </div>
 
                                 {/* Ultrawide */}
@@ -466,7 +504,7 @@ export const TypographyControl = ({
                                     <span className="jankx-typo-device-label">
                                         {__('Ultrawide', 'jankx')}
                                     </span>
-                                    <ButtonGroup>
+                                    <div style={{display:'flex',gap:'2px'}}>
                                         {['left', 'center', 'right', 'justify'].map((align) => (
                                             <Button
                                                 key={align}
@@ -488,7 +526,7 @@ export const TypographyControl = ({
                                                 label={align}
                                             />
                                         ))}
-                                    </ButtonGroup>
+                                    </div>
                                 </div>
 
                                 {/* Tablet */}
@@ -496,7 +534,7 @@ export const TypographyControl = ({
                                     <span className="jankx-typo-device-label">
                                         {__('Tablet', 'jankx')}
                                     </span>
-                                    <ButtonGroup>
+                                    <div style={{display:'flex',gap:'2px'}}>
                                         {['left', 'center', 'right', 'justify'].map((align) => (
                                             <Button
                                                 key={align}
@@ -518,7 +556,7 @@ export const TypographyControl = ({
                                                 label={align}
                                             />
                                         ))}
-                                    </ButtonGroup>
+                                    </div>
                                 </div>
 
                                 {/* Mobile */}
@@ -526,7 +564,7 @@ export const TypographyControl = ({
                                     <span className="jankx-typo-device-label">
                                         {__('Mobile', 'jankx')}
                                     </span>
-                                    <ButtonGroup>
+                                    <div style={{display:'flex',gap:'2px'}}>
                                         {['left', 'center', 'right', 'justify'].map((align) => (
                                             <Button
                                                 key={align}
@@ -548,7 +586,7 @@ export const TypographyControl = ({
                                                 label={align}
                                             />
                                         ))}
-                                    </ButtonGroup>
+                                    </div>
                                 </div>
 
                                 {/* Responsive Font Size */}

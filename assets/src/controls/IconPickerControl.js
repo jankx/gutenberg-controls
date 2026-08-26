@@ -15,7 +15,6 @@ import {
     Button,
     SearchControl,
     Popover,
-    ButtonGroup,
     TabPanel,
     __experimentalGrid as Grid,
     Tooltip,

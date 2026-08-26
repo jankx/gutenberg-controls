@@ -13,7 +13,6 @@ import { useState, useCallback } from '@wordpress/element';
 import {
     BaseControl,
     Button,
-    ButtonGroup,
     ToggleControl,
     __experimentalGrid as Grid,
     __experimentalHStack as HStack,
@@ -40,6 +39,8 @@ import {
     arrowDown,
     arrowUp,
     arrowLeft,
+    link,
+    linkOff,
 } from '@wordpress/icons';
 
 /**
@@ -128,17 +129,32 @@ const ResponsiveControl = ({
     allowFlex = true,
     allowTextAlign = true,
     allowStack = true,
+    isLinked: externalIsLinked,
+    setIsLinked: externalSetIsLinked,
 }) => {
     const [activeDevice, setActiveDevice] = useState('desktop');
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [internalIsLinked, setInternalIsLinked] = useState(true);
+
+    // Use external link state when available
+    const isLinked = externalIsLinked !== undefined ? externalIsLinked : internalIsLinked;
+    const setIsLinked = externalSetIsLinked || setInternalIsLinked;
 
     const updateDeviceValue = useCallback((device, key, newValue) => {
         const deviceKey = `${key}${device.charAt(0).toUpperCase() + device.slice(1)}`;
+        if (isLinked) {
+            const linkedValues = DEVICES.reduce((result, currentDevice) => ({
+                ...result,
+                [`${key}${currentDevice.name.charAt(0).toUpperCase() + currentDevice.name.slice(1)}`]: newValue,
+            }), {});
+            onChange({ ...value, ...linkedValues });
+            return;
+        }
         onChange({
             ...value,
             [deviceKey]: newValue,
         });
-    }, [value, onChange]);
+    }, [value, onChange, isLinked]);
 
     const getDeviceValue = useCallback((device, key, defaultValue = null) => {
         const deviceKey = `${key}${device.charAt(0).toUpperCase() + device.slice(1)}`;
@@ -182,7 +198,7 @@ const ResponsiveControl = ({
             </div>
 
             {/* Device selector tabs */}
-            <ButtonGroup className="jankx-device-tabs">
+            <div style={{display:'flex',gap:'2px'}} className="jankx-device-tabs">
                 {DEVICES.map((device) => (
                     <Tooltip key={device.name} text={device.label}>
                         <Button
@@ -198,7 +214,7 @@ const ResponsiveControl = ({
                         </Button>
                     </Tooltip>
                 ))}
-            </ButtonGroup>
+            </div>
 
             {/* Visibility toggles */}
             {allowVisibility && (
@@ -232,7 +248,7 @@ const ResponsiveControl = ({
                     <label className="jankx-control-label">
                         {__('Stack vertically at', 'jankx')}
                     </label>
-                    <ButtonGroup className="jankx-stack-buttons">
+                    <div style={{display:'flex',gap:'2px'}} className="jankx-stack-buttons">
                         {STACK_PRESETS.map((preset) => (
                             <Button
                                 key={preset.value}
@@ -244,7 +260,7 @@ const ResponsiveControl = ({
                                 {preset.label}
                             </Button>
                         ))}
-                    </ButtonGroup>
+                    </div>
                     
                     {value.stackVertically && (
                         <ToggleControl
@@ -264,6 +280,15 @@ const ResponsiveControl = ({
                 <label className="jankx-control-label">
                     {DEVICES.find(d => d.name === activeDevice).label} {__('Settings', 'jankx')}
                 </label>
+                <Tooltip text={isLinked ? __('Unlink device values', 'jankx') : __('Link device values', 'jankx')}>
+                    <Button
+                        icon={isLinked ? link : linkOff}
+                        isPressed={isLinked}
+                        onClick={() => setIsLinked((current) => !current)}
+                        label={isLinked ? __('Unlink device values', 'jankx') : __('Link device values', 'jankx')}
+                        size="small"
+                    />
+                </Tooltip>
 
                 <VStack spacing={3}>
                     {/* Column span */}
@@ -273,7 +298,7 @@ const ResponsiveControl = ({
                                 <Icon icon={layout} size={16} />
                                 {__('Columns', 'jankx')}
                             </label>
-                            <ButtonGroup className="jankx-col-span">
+                            <div style={{display:'flex',gap:'2px'}} className="jankx-col-span">
                                 {[1, 2, 3, 4, 6, 12].map((cols) => (
                                     <Button
                                         key={cols}
@@ -285,7 +310,7 @@ const ResponsiveControl = ({
                                         {cols === 12 ? __('Full', 'jankx') : `${12/cols}/${cols}`}
                                     </Button>
                                 ))}
-                            </ButtonGroup>
+                            </div>
                         </div>
                     )}
 
@@ -313,7 +338,7 @@ const ResponsiveControl = ({
                             <label className="jankx-setting-label">
                                 {__('Direction', 'jankx')}
                             </label>
-                            <ButtonGroup className="jankx-flex-direction">
+                            <div style={{display:'flex',gap:'2px'}} className="jankx-flex-direction">
                                 {FLEX_DIRECTIONS.map((dir) => (
                                     <Tooltip key={dir.value} text={dir.label}>
                                         <Button
@@ -325,7 +350,7 @@ const ResponsiveControl = ({
                                         />
                                     </Tooltip>
                                 ))}
-                            </ButtonGroup>
+                            </div>
                         </div>
                     )}
 
@@ -335,7 +360,7 @@ const ResponsiveControl = ({
                             <label className="jankx-setting-label">
                                 {__('Text Align', 'jankx')}
                             </label>
-                            <ButtonGroup className="jankx-text-align">
+                            <div style={{display:'flex',gap:'2px'}} className="jankx-text-align">
                                 {TEXT_ALIGNMENTS.map((align) => (
                                     <Tooltip key={align.value} text={align.label}>
                                         <Button
@@ -347,7 +372,7 @@ const ResponsiveControl = ({
                                         />
                                     </Tooltip>
                                 ))}
-                            </ButtonGroup>
+                            </div>
                         </div>
                     )}
 
