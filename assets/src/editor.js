@@ -21,6 +21,7 @@ import IconPickerControl from './controls/IconPickerControl';
 import ResponsiveControl from './controls/ResponsiveControl';
 import ColorControl from './controls/ColorControl';
 import TypographyControl from './controls/TypographyControl';
+import ResponsiveAspectRatioControl from './controls/ResponsiveAspectRatioControl';
 
 // Import new components
 import ResponsiveWrapper from './components/ResponsiveWrapper';
@@ -516,6 +517,16 @@ addFilter(
  * Initialize when DOM is ready
  */
 wp.domReady(() => {
+    // Expose reusable controls on a global namespace so downstream
+    // blocks (e.g. dynamic-data-template, dynamic-term-template) can use them
+    // directly in their own edit components.
+    window.jankxControls = window.jankxControls || {};
+    window.jankxControls.ResponsiveAspectRatioControl = ResponsiveAspectRatioControl;
+    window.jankxControls.ResponsiveControl = ResponsiveControl;
+    window.jankxControls.ColorControl = ColorControl;
+    window.jankxControls.TypographyControl = TypographyControl;
+    window.jankxControls.VisualSpacingControl = VisualSpacingControl;
+
     // Register custom block categories
     const categories = wp.blocks.getCategories();
     const jankxCategories = [
@@ -548,6 +559,7 @@ export {
     ResponsiveControl,
     ColorControl,
     TypographyControl,
+    ResponsiveAspectRatioControl,
     useLivePreview,
     withLivePreview,
     CustomPresetManager,
